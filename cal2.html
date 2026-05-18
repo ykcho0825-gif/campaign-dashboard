@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset='utf-8' />
+    <title>B tv Campaign Dashboard V6.5 (Live Spreadsheet Version)</title>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+    <style>
+        :root {
+            --apple-bg: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-gray: #f5f5f7;
+            --start-color: #0071e3; 
+            --end-color: #ff3b30;   
+            --apple-blue: #0071e3;
+            --hyundai-navy: #00287a;
+            --gantt-bar-bg: #f2f2f7;
+            --gantt-bar-border: #8e8e93;
+            --gantt-bar-text: #1d1d1f;
+        }
+
+        body {
+            margin: 0; padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+            background-color: var(--apple-bg); color: var(--apple-text);
+        }
+
+        .header-container, #calendar, #ganttContainer { max-width: 1200px; margin: 0 auto; }
+        
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); z-index: 9999;
+            display: flex; justify-content: center; align-items: center; 
+            font-weight: 600; font-size: 14px;
+        }
+
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .title-section h2 { font-size: 16pt; font-weight: 700; color: var(--hyundai-navy); margin: 0; }
+        
+        .action-section { display: flex; gap: 10px; align-items: center; }
+        .search-input { padding: 8px 12px; border-radius: 8px; border: 1px solid #d2d2d7; font-size: 12px; width: 220px; outline: none; }
+        
+        .toggle-btn {
+            padding: 8px 16px; background-color: var(--gantt-bar-bg); border: 1px solid #d2d2d7;
+            color: var(--apple-text); border-radius: 8px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease; user-select: none;
+        }
+        .toggle-btn:hover { background-color: #e5e5ea; border-color: #b3b3b3; }
+
+        .summary-bar {
+            display: flex; gap: 24px; background: var(--apple-gray);
+            padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 12px;
+            flex-wrap: wrap; align-items: center;
+        }
+        .summary-group { display: flex; gap: 16px; align-items: center; }
+        .summary-group:not(:last-child) { border-right: 1px solid #d2d2d7; padding-right: 20px; }
+        .summary-item b { color: var(--apple-text); font-size: 14px; }
+        .summary-label { font-weight: 600; color: #86868b; margin-right: 4px; }
+
+        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
+        .filter-title { font-size: 11px; font-weight: 600; color: #86868b; margin-bottom: 6px; }
+        .filter-wrapper { display: flex; flex-direction: column; gap: 4px; }
+        .filter-section { display: flex; gap: 8px; align-items: center; }
+        
+        .filter-chip {
+            padding: 6px 14px; background: var(--apple-gray); border-radius: 8px;
+            font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid transparent; user-select: none;
+        }
+        .filter-chip input { display: none; }
+        .filter-chip:has(input:checked) { background: #e8e8ed; border-color: var(--apple-text); font-weight: 600; }
+
+        .checkbox-label {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 11px;
+            font-weight: 400; color: var(--apple-text); cursor: pointer; user-select: none; padding: 6px 4px;
+        }
+        .checkbox-label input[type="checkbox"] {
+            appearance: none; -webkit-appearance: none; background-color: #fff; margin: 0;
+            font: inherit; color: currentColor; width: 14px; height: 14px; border: 1.5px solid #8e8e93; 
+            border-radius: 3px; display: grid; place-content: center; cursor: pointer; transition: all 0.15s ease;
+        }
+        .checkbox-label input[type="checkbox"]:hover { border-color: #48484a; background-color: #f5f5f7; }
+        .checkbox-label input[type="checkbox"]:checked { background-color: #48484a; border-color: #48484a; }
+        .checkbox-label input[type="checkbox"]::before {
+            content: ""; width: 8px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+            transform: rotate(-45deg) translate(1px, -1px); scale: 0; transition: scale 0.1s ease-in-out;
+        }
+        .checkbox-label input[type="checkbox"]:checked::before { scale: 1; }
+
+        .filter-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 2px; margin-right: 2px; }
+        .filter-dot.start { background-color: var(--start-color); }
+        .filter-dot.end { background-color: var(--end-color); }
+
+        .fc .fc-daygrid-day { cursor: pointer; } 
+        .fc .fc-toolbar-title { font-size: 14pt !important; font-weight: 700 !important; color: #000000 !important; }
+        .fc .fc-daygrid-day-number { font-size: 13.5px !important; font-weight: 700 !important; color: var(--apple-text) !important; padding: 6px 8px !important; }
+        .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13.5px !important; font-weight: 700 !important; padding: 6px 0 !important; }
+
+        .fc .fc-button { padding: 4px 10px !important; font-size: 11px !important; height: auto !important; }
+        .fc-daygrid-more-link { font-size: 10px !important; font-weight: 500 !important; color: #6e6e73 !important; }
+        
+        .fc-event { cursor: pointer; padding: 2px 4px; border-radius: 4px !important; border: none !important; margin-bottom: 1px !important; }
+        .fc-event-title { font-weight: 600 !important; font-size: 11px; color: #000 !important; }
+        .event-start { background-color: #e6f2ff !important; border-left: 3px solid var(--start-color) !important; }
+        .event-end { background-color: #fff0f0 !important; border-left: 3px solid var(--end-color) !important; }
+
+        #ganttContainer { display: none; margin-top: 10px; animation: fadeIn 0.3s ease; }
+        .gantt-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
+        #ganttMonthTitle { font-size: 14pt; font-weight: 700; color: #000000; margin: 0; }
+        .gantt-toolbar-right { display: flex; gap: 8px; align-items: center; }
+        .gantt-btn-group { display: flex; }
+        .gantt-btn {
+            background-color: #2c3e50; border: 1px solid #2c3e50; color: #fff;
+            padding: 4px 10px; font-size: 11px; cursor: pointer; transition: background-color 0.2s;
+            height: 25px; display: flex; align-items: center; justify-content: center;
+        }
+        .gantt-btn-today { border-radius: 4px; }
+        .gantt-btn-prev { border-radius: 4px 0 0 4px; border-right: 1px solid #1a252f; }
+        .gantt-btn-next { border-radius: 0 4px 4px 0; }
+        .gantt-btn:hover { background-color: #1e2b3c; }
+
+        .gantt-border-wrap { border: 1px solid #e5e5ea; border-radius: 12px; overflow: hidden; background: #fff; }
+        
+        .gantt-table-row-layout { display: flex; align-items: stretch; width: 100%; box-sizing: border-box; }
+        .gantt-label-col { width: 250px; min-width: 250px; max-width: 250px; padding: 12px; border-right: 1px solid #e5e5ea; box-sizing: border-box; display: flex; align-items: center; }
+        .gantt-timeline-col { flex-grow: 1; display: grid; position: relative; box-sizing: border-box; }
+        .gantt-header { background: var(--apple-gray); border-bottom: 1px solid #e5e5ea; font-weight: 600; font-size: 11px; }
+        
+        .gantt-month-day { text-align: center; padding: 12px 0; font-variant-numeric: tabular-nums; color: #6e6e73; font-size: 10px; box-sizing: border-box; border-right: 1px solid #e5e5ea; }
+        .gantt-month-day:last-child { border-right: none; } 
+        .gantt-month-day.sat { color: #0071e3; }
+        .gantt-month-day.sun { color: #ff3b30; }
+
+        .gantt-body { max-height: 600px; overflow-y: auto; }
+        .gantt-row { border-bottom: 1px solid #f2f2f7; min-height: 44px; background: #fff; transition: background 0.15s; }
+        .gantt-row:hover { background: #f5f5f7; }
+        .gantt-row:last-child { border-bottom: none; }
+        .gantt-title-cell { font-size: 13px; font-weight: 600; color: var(--apple-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .gantt-grid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; pointer-events: none; z-index: 1; box-sizing: border-box; }
+        .gantt-cell-col { box-sizing: border-box; height: 100%; border-right: none !important; }
+        .gantt-bar-container { position: relative; width: 100%; min-height: 44px; display: flex; align-items: center; z-index: 2; }
+        
+        .gantt-bar {
+            position: absolute; height: 26px; line-height: 26px; background: var(--gantt-bar-bg); color: var(--gantt-bar-text);
+            border-left: 4px solid var(--gantt-bar-border); border-radius: 6px; font-size: 12px; font-weight: 600;
+            padding: 0 10px; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            cursor: pointer; transition: transform 0.1s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .gantt-bar:hover { transform: scale(1.005); background: #e5e5ea; }
+        .gantt-empty-msg { text-align: center; color: #86868b; padding: 50px 0; font-size: 13px; width: 100%; background: #fff; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); }
+        .modal-content { background: white; margin: 5% auto; padding: 25px; width: 380px; border-radius: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+        .modal-target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .modal-target-card { background: var(--apple-gray); padding: 10px 12px; border-radius: 8px; font-size: 12px; border: 1px solid #e5e5ea; box-sizing: border-box; }
+        .modal-target-card-label { font-weight: 600; color: #86868b; margin-bottom: 2px; }
+        .modal-target-card-value { font-size: 14px; font-weight: 700; color: var(--apple-text); }
+        .capa-text { display: block; font-size: 10.5px; font-weight: 600; color: var(--apple-blue); margin-top: 2px; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">구글 스프레드시트 연동 중...</div>
+
+    <div class="header-container">
+        <div class="top-row">
+            <div class="title-section"><h2>B tv Campaign Dashboard</h2></div>
+            <div class="action-section">
+                <input type="text" id="eventSearch" class="search-input" placeholder="캠페인명 검색...">
+                <button id="viewToggleBtn" class="toggle-btn" onclick="toggleViewMode()">목록 보기</button>
+            </div>
+        </div>
+        
+        <div class="summary-bar">
+            <div class="summary-group">
+                <span class="summary-label">[요약]</span>
+                <div class="summary-item">이번 달 시작: <b id="startCount">0</b>건</div>
+                <div class="summary-item">이번 달 종료: <b id="endCount">0</b>건</div>
+            </div>
+            <div class="summary-group">
+                <span class="summary-label">[채널별]</span>
+                <div class="summary-item">TV팝업: <b id="tvCount">0</b>건 <span id="tvTarget" style="color:#666; margin-left:2px;">(0만)</span></div>
+                <div class="summary-item">토스트팝업: <b id="toastCount">0</b>건 <span id="toastTarget" style="color:#666; margin-left:2px;">(0만)</span></div>
+                <div class="summary-item">쿠폰: <b id="couponCount">0</b>건 <span id="couponTarget" style="color:#666; margin-left:2px;">(0만)</span></div>
+                <div class="summary-item">Seg채널: <b id="segCount">0</b>건 <span id="segTarget" style="color:#666; margin-left:2px;">(0만)</span></div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <div class="filter-wrapper">
+                <div class="filter-title">채널 필터</div>
+                <div class="filter-section">
+                    <label class="filter-chip"><input type="checkbox" class="type-filter" value="TV"> TV팝업</label>
+                    <label class="filter-chip"><input type="checkbox" class="type-filter" value="토스트팝업"> 토스트팝업</label>
+                    <label class="filter-chip"><input type="checkbox" class="type-filter" value="쿠폰"> 쿠폰</label>
+                    <label class="filter-chip"><input type="checkbox" class="type-filter" value="Seg채널"> Seg채널</label>
+                </div>
+            </div>
+
+            <div class="filter-wrapper" style="align-items: flex-end;">
+                <div class="filter-title" style="align-self: flex-end;">일정 종류 필터</div>
+                <div class="filter-section" style="gap: 12px;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="date-filter" value="start" checked>
+                        <span class="filter-dot start"></span>시작일(파랑)
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="date-filter" value="end" checked>
+                        <span class="filter-dot end"></span>종료일(빨강)
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id='calendar'></div>
+
+    <div id="ganttContainer">
+        <div class="gantt-toolbar">
+            <div class="gantt-toolbar-left"><h2 id="ganttMonthTitle"></h2></div>
+            <div class="gantt-toolbar-right">
+                <button class="gantt-btn gantt-btn-today" onclick="navigateGantt('today')">오늘</button>
+                <div class="gantt-btn-group">
+                    <button class="gantt-btn gantt-btn-prev" onclick="navigateGantt('prev')">&lt;</button>
+                    <button class="gantt-btn gantt-btn-next" onclick="navigateGantt('next')">&gt;</button>
+                </div>
+            </div>
+        </div>
+        <div class="gantt-border-wrap">
+            <div class="gantt-header gantt-table-row-layout">
+                <div class="gantt-label-col">캠페인명</div>
+                <div class="gantt-timeline-col" id="ganttHeaderTimeline"></div>
+            </div>
+            <div class="gantt-body" id="ganttRowsContainer"></div>
+        </div>
+    </div>
+
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span style="float:right; cursor:pointer; font-weight:bold;" onclick="closeModal()">&times;</span>
+            <div id="modalTitle" style="font-size:15px; font-weight:600; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;"></div>
+            <div id="modalBody" style="font-size:13px; line-height:1.6;"></div>
+        </div>
+    </div>
+
+    <script>
+        const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJDqgcPmC1RsB_57OgHxXZ9uqKNiGDICkSKqftjk6CbflfyhVWA2G0LrqLBwuQtTNsffKBtc-aKbD0/pub?output=csv';
+
+        let rawSourceData = []; 
+        let allEvents = [];
+        let calendar;
+        let currentViewMode = 'calendar'; 
+        let currentFilteredEvents = []; 
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchDataFromCSV();
+
+            document.querySelectorAll('.type-filter').forEach(cb => cb.addEventListener('change', applyFilters));
+            document.querySelectorAll('.date-filter').forEach(cb => cb.addEventListener('change', applyFilters));
+            document.getElementById('eventSearch').addEventListener('input', applyFilters);
+        });
+
+        function parseCSV(csvText) {
+            const lines = csvText.split(/\r?\n/);
+            if (lines.length === 0) return [];
+
+            const headers = parseCSVLine(lines[0]);
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const currentLine = parseCSVLine(lines[i]);
+                const obj = {};
+                
+                headers.forEach((header, index) => {
+                    obj[header.trim()] = currentLine[index] ? currentLine[index].trim() : "";
+                });
+                result.push(obj);
+            }
+            return result;
+        }
+
+        function parseCSVLine(line) {
+            const arr = [];
+            let quote = false;
+            let cell = "";
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') {
+                    quote = !quote;
+                } else if (char === ',' && !quote) {
+                    arr.push(cell);
+                    cell = "";
+                } else {
+                    cell += char;
+                }
+            }
+            arr.push(cell);
+            return arr;
+        }
+
+        function fetchDataFromCSV() {
+            fetch(SPREADSHEET_CSV_URL)
+                .then(res => {
+                    if (!res.ok) throw new Error("시트 연결 실패");
+                    return res.text();
+                })
+                .then(csvText => {
+                    rawSourceData = parseCSV(csvText);
+                    allEvents = processEvents(rawSourceData);
+                    initCalendar(allEvents);
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    updateSummary();
+                })
+                .catch(err => {
+                    document.getElementById('loadingOverlay').innerText = "구글 시트 연동 오류가 발생했습니다. (링크 공개 상태 확인 필요)";
+                    console.error(err);
+                });
+        }
+
+        // 특정 객체에서 공백이나 자잘한 이름 차이를 무시하고 '타겟수' 값을 안전하게 추출하는 유틸리티 함수
+        function getTargetValue(item) {
+            let targetValue = 0;
+            Object.keys(item).forEach(k => {
+                const normalizedKey = k.replace(/\s+/g, ''); // 모든 공백 제거
+                if (normalizedKey === '타겟수' || normalizedKey === '타겟수(만)') {
+                    if (normalizedKey === '타겟수') {
+                        // 숫자가 아닌 문자(쉼표 등)는 전부 제거 후 숫자로 파싱
+                        const cleanNum = String(item[k]).replace(/[^0-9]/g, '');
+                        if (cleanNum) targetValue = Number(cleanNum);
+                    }
+                }
+            });
+            return targetValue;
+        }
+
+        function toggleViewMode() {
+            const calEl = document.getElementById('calendar');
+            const ganttEl = document.getElementById('ganttContainer');
+            const btn = document.getElementById('viewToggleBtn');
+
+            if (currentViewMode === 'calendar') {
+                currentViewMode = 'gantt';
+                calEl.style.display = 'none';
+                ganttEl.style.display = 'block';
+                btn.innerText = '캘린더 보기';
+                updateGanttTitle(); 
+                applyFilters(); 
+            } else {
+                currentViewMode = 'calendar';
+                ganttEl.style.display = 'none';
+                calEl.style.display = 'block';
+                btn.innerText = '목록 보기'; 
+                if(calendar) calendar.render(); 
+                applyFilters();
+            }
+        }
+
+        function navigateGantt(action) {
+            if (!calendar) return;
+            if (action === 'prev') { calendar.prev(); } 
+            else if (action === 'next') { calendar.next(); } 
+            else if (action === 'today') { calendar.today(); }
+        }
+
+        function updateGanttTitle() {
+            if (calendar) { document.getElementById('ganttMonthTitle').innerText = calendar.view.title; }
+        }
+
+        function cleanDateStr(dateVal) {
+            if (!dateVal) return "";
+            let str = String(dateVal).trim();
+            if (str.includes("T")) { str = str.split("T")[0]; }
+            return str; 
+        }
+
+        function formatTargetNumber(num) {
+            if (!num || isNaN(num) || num === 0) return "-";
+            if (num >= 10000) { return Math.round(num / 10000).toLocaleString('ko-KR') + "만"; } 
+            else if (num >= 1000) { return Math.round(num / 1000).toLocaleString('ko-KR') + "천"; } 
+            else { return Math.round(num / 100).toLocaleString('ko-KR') + "백"; }
+        }
+
+        function processEvents(data) {
+            let processed = [];
+            data.forEach(event => {
+                const startVal = cleanDateStr(event['시작일']);
+                const endVal = cleanDateStr(event['종료일']) || startVal;
+                const titleVal = event['캠페인명'] || "제목 없음";
+
+                if (startVal) {
+                    processed.push({ 
+                        title: titleVal, 
+                        start: startVal, 
+                        allDay: true,
+                        className: 'event-start', 
+                        extendedProps: { ...event, type: 'start', sortOrder: 1, _calStart: startVal, _calEnd: endVal } 
+                    });
+
+                    if (endVal && startVal !== endVal) {
+                        processed.push({ 
+                            title: titleVal, 
+                            start: endVal, 
+                            allDay: true,
+                            className: 'event-end', 
+                            extendedProps: { ...event, type: 'end', sortOrder: 2, _calStart: startVal, _calEnd: endVal } 
+                        });
+                    }
+                }
+            });
+            return processed;
+        }
+
+        function initCalendar(data) {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth', 
+                initialDate: '2026-05-01', 
+                locale: 'ko',
+                events: data, 
+                dayMaxEvents: 6, 
+                height: 'auto',
+                eventOrder: 'sortOrder,title', 
+                eventClick: function(info) { 
+                    info.jsEvent.stopPropagation(); 
+                    showModalFromProps(info.event.extendedProps); 
+                },
+                dateClick: function(info) {
+                    showTargetSumModalOfDate(info.dateStr);
+                },
+                datesSet: function() { 
+                    if(currentViewMode === 'gantt') {
+                        updateGanttTitle();
+                        applyFilters(); 
+                    } else {
+                        updateSummary(); 
+                    }
+                }
+            });
+            calendar.render();
+            currentFilteredEvents = [...allEvents]; 
+        }
+
+        function showTargetSumModalOfDate(clickedDateStr) {
+            const targetCampaigns = currentFilteredEvents.filter(e => {
+                return e.extendedProps.type === 'start' && e.start === clickedDateStr;
+            });
+
+            let dateTitle = clickedDateStr;
+            const dateParts = clickedDateStr.split("-");
+            if (dateParts.length === 3) { dateTitle = `${dateParts[1]}/${dateParts[2]}`; }
+            document.getElementById('modalTitle').innerText = `${dateTitle} 발송 캠페인 타겟 수`;
+            
+            if (targetCampaigns.length === 0) {
+                document.getElementById('modalBody').innerHTML = `<div style="text-align:center; color:#86868b; padding:20px 0;">해당 날짜에 시작하는 캠페인이 없습니다.</div>`;
+                document.getElementById('eventModal').style.display = 'block';
+                return;
+            }
+
+            let tvTargetSum = 0, toastTargetSum = 0, couponTargetSum = 0, segTargetSum = 0;
+            let listHtml = `<div style="margin-top:14px; margin-bottom:8px; font-weight:600; color:#48484a; font-size:12px;">시작 캠페인 목록 (${targetCampaigns.length}건):</div>`;
+            listHtml += `<ul style="margin:0; padding-left:18px; color:#1d1d1f; max-height:180px; overflow-y:auto; font-size:11.5px; line-height:1.5;">`;
+
+            targetCampaigns.forEach(c => {
+                const props = c.extendedProps;
+                const filterVal = (props['필터'] || "").toUpperCase(); 
+                const targetValue = getTargetValue(props); // 안전한 타겟수 sum 추출 함수 적용
+
+                if (filterVal.includes("TV")) { tvTargetSum += targetValue; }
+                if (filterVal.includes("토스트")) { toastTargetSum += targetValue; }
+                if (filterVal.includes("쿠폰")) { couponTargetSum += targetValue; }
+                if (filterVal.includes("SEG") || filterVal.includes("배너")) { segTargetSum += targetValue; }
+
+                listHtml += `<li style="margin-bottom:3px;">${c.title} <span style="color:#86868b;">(${formatTargetNumber(targetValue)})</span></li>`;
+            });
+            listHtml += `</ul>`;
+
+            const remainingCouponCapa = 2700000 - couponTargetSum;
+            const couponCapaFormatted = formatTargetNumber(remainingCouponCapa < 0 ? 0 : remainingCouponCapa);
+            const remainingSegCapa = 3000000 - segTargetSum;
+            const segCapaFormatted = formatTargetNumber(remainingSegCapa < 0 ? 0 : remainingSegCapa);
+
+            let resultHtml = `
+                <div class="modal-target-grid">
+                    <div class="modal-target-card"><div class="modal-target-card-label">TV팝업</div><div class="modal-target-card-value">${formatTargetNumber(tvTargetSum)}</div></div>
+                    <div class="modal-target-card"><div class="modal-target-card-label">토스트팝업</div><div class="modal-target-card-value">${formatTargetNumber(toastTargetSum)}</div></div>
+                    <div class="modal-target-card"><div class="modal-target-card-label">쿠폰</div><div class="modal-target-card-value">${formatTargetNumber(couponTargetSum)}<span class="capa-text">(잔여 capa: ${couponCapaFormatted})</span></div></div>
+                    <div class="modal-target-card"><div class="modal-target-card-label">타겟배너(Seg)</div><div class="modal-target-card-value">${formatTargetNumber(segTargetSum)}<span class="capa-text">(잔여 capa: ${segCapaFormatted})</span></div></div>
+                </div>
+                ${listHtml}
+            `;
+
+            document.getElementById('modalBody').innerHTML = resultHtml;
+            document.getElementById('eventModal').style.display = 'block';
+        }
+
+        function applyFilters() {
+            const activeFilters = Array.from(document.querySelectorAll('.type-filter:checked')).map(el => el.value);
+            const activeDateFilters = Array.from(document.querySelectorAll('.date-filter:checked')).map(el => el.value);
+            const searchText = document.getElementById('eventSearch').value.toUpperCase();
+            
+            currentFilteredEvents = allEvents.filter(event => {
+                const p = event.extendedProps;
+                const title = (event.title || "").toUpperCase();
+                const filterText = (p['필터'] || "").toUpperCase(); 
+                
+                const matchesSearch = title.includes(searchText);
+                const matchesDateType = activeDateFilters.includes(p.type);
+                
+                let matchesType = false;
+                if (activeFilters.length === 0) { matchesType = true; } 
+                else {
+                    const hasTV = activeFilters.includes("TV") && filterText.includes("TV");
+                    const hasToast = activeFilters.includes("토스트팝업") && filterText.includes("토스트");
+                    const hasCoupon = activeFilters.includes("쿠폰") && filterText.includes("쿠폰");
+                    const hasSeg = activeFilters.includes("Seg채널") && (filterText.includes("SEG") || filterText.includes("배너"));
+                    matchesType = hasTV || hasToast || hasCoupon || hasSeg;
+                }
+                return matchesSearch && matchesDateType && matchesType;
+            });
+
+            if(calendar) {
+                calendar.removeAllEvents();
+                calendar.addEventSource(currentFilteredEvents);
+            }
+            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText); }
+            updateSummary(currentFilteredEvents);
+        }
+
+        function renderGanttChart(activeFilters, searchText) {
+            const headerTimeline = document.getElementById('ganttHeaderTimeline');
+            const rowsContainer = document.getElementById('ganttRowsContainer');
+            
+            headerTimeline.innerHTML = "";
+            rowsContainer.innerHTML = "";
+
+            if (!calendar) return;
+
+            const currentPeriod = calendar.getDate();
+            const year = currentPeriod.getFullYear();
+            const month = currentPeriod.getMonth(); 
+
+            const totalDays = new Date(year, month + 1, 0).getDate();
+            const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+            const gridStyle = `repeat(${totalDays}, minmax(0, 1fr))`;
+            headerTimeline.style.gridTemplateColumns = gridStyle;
+
+            for (let d = 1; d <= totalDays; d++) {
+                const dateObj = new Date(year, month, d);
+                const dayOfWeek = weekDays[dateObj.getDay()];
+                const dayEl = document.createElement('div');
+                dayEl.className = 'gantt-month-day';
+                if (dateObj.getDay() === 6) dayEl.classList.add('sat');
+                if (dateObj.getDay() === 0) dayEl.classList.add('sun');
+                dayEl.innerText = `${d}(${dayOfWeek})`;
+                headerTimeline.appendChild(dayEl);
+            }
+
+            let itemsToRender = [...rawSourceData];
+            itemsToRender.sort((a, b) => {
+                const dateA = new Date(cleanDateStr(a['시작일']) || '9999-12-31');
+                const dateB = new Date(cleanDateStr(b['시작일']) || '9999-12-31');
+                return dateA - dateB; 
+            });
+
+            let renderCount = 0;
+
+            itemsToRender.forEach(item => {
+                const title = item['캠페인명'] || "제목 없음";
+                const filterText = (item['필터'] || "").toUpperCase();
+                
+                if (searchText && !title.toUpperCase().includes(searchText)) return;
+
+                if (activeFilters.length > 0) {
+                    const hasTV = activeFilters.includes("TV") && filterText.includes("TV");
+                    const hasToast = activeFilters.includes("토스트팝업") && filterText.includes("토스트");
+                    const hasCoupon = activeFilters.includes("쿠폰") && filterText.includes("쿠폰");
+                    const hasSeg = activeFilters.includes("Seg채널") && (filterText.includes("SEG") || filterText.includes("배너"));
+                    if (!(hasTV || hasToast || hasCoupon || hasSeg)) return;
+                }
+
+                const sDateStr = cleanDateStr(item['시작일']);
+                const eDateStr = cleanDateStr(item['종료일']) || sDateStr;
+                if (!sDateStr) return;
+
+                const sDate = new Date(sDateStr);
+                const eDate = new Date(eDateStr);
+                const monthStart = new Date(year, month, 1);
+                const monthEnd = new Date(year, month, totalDays);
+
+                if (eDate < monthStart || sDate > monthEnd) return;
+                renderCount++;
+
+                let startActiveDay = sDate.getMonth() === month ? sDate.getDate() : 1;
+                let endActiveDay = eDate.getMonth() === month ? eDate.getDate() : totalDays;
+                if(endActiveDay < startActiveDay) endActiveDay = startActiveDay;
+
+                const dayWidthPercent = 100 / totalDays;
+                const leftPosition = (startActiveDay - 1) * dayWidthPercent;
+                const barWidth = ((endActiveDay - startActiveDay) + 1) * dayWidthPercent;
+
+                const row = document.createElement('div');
+                row.className = 'gantt-row gantt-table-row-layout';
+
+                const titleCell = document.createElement('div');
+                titleCell.className = 'gantt-label-col gantt-title-cell';
+                titleCell.innerText = title; titleCell.title = title;
+                row.appendChild(titleCell);
+
+                const timelineCol = document.createElement('div');
+                timelineCol.className = 'gantt-timeline-col';
+
+                const gridBg = document.createElement('div');
+                gridBg.className = 'gantt-grid-bg'; gridBg.style.gridTemplateColumns = gridStyle;
+                for (let gridDay = 1; gridDay <= totalDays; gridDay++) {
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'gantt-cell-col';
+                    gridBg.appendChild(colDiv);
+                }
+                timelineCol.appendChild(gridBg);
+
+                const barContainer = document.createElement('div');
+                barContainer.className = 'gantt-bar-container';
+
+                const bar = document.createElement('div');
+                bar.className = 'gantt-bar';
+                bar.style.left = `${leftPosition}%`; bar.style.width = `${barWidth}%`;
+                bar.innerText = title; bar.title = `${title} (${sDateStr} ~ ${eDateStr})`;
+
+                const extendedPropsObj = { ...item, _calStart: sDateStr, _calEnd: eDateStr };
+                bar.onclick = (e) => { e.stopPropagation(); showModalFromProps(extendedPropsObj); };
+
+                barContainer.appendChild(bar);
+                timelineCol.appendChild(barContainer);
+                row.appendChild(timelineCol);
+                rowsContainer.appendChild(row);
+            });
+
+            if (renderCount === 0) {
+                rowsContainer.innerHTML = `<div class="gantt-empty-msg">필터 조건에 부합하는 캠페인이 존재하지 않습니다.</div>`;
+            }
+        }
+
+        function updateSummary(currentEvents) {
+            const eventsToCount = currentEvents || allEvents;
+            if (!calendar) return;
+            
+            const currentMonth = calendar.getDate().getMonth();
+            const thisMonthEvents = eventsToCount.filter(e => {
+                const parts = e.start.split("-");
+                if(parts.length >= 2) { return (parseInt(parts[1], 10) - 1) === currentMonth; }
+                return false;
+            });
+
+            const starts = thisMonthEvents.filter(e => e.extendedProps.type === 'start').length;
+            const ends = thisMonthEvents.filter(e => e.extendedProps.type === 'end').length;
+            const uniqueCampaigns = thisMonthEvents.filter(e => e.extendedProps.type === 'start');
+            
+            let tvCount = 0, toastCount = 0, couponCount = 0, segCount = 0;
+            let tvTargetSum = 0, toastTargetSum = 0, couponTargetSum = 0, segTargetSum = 0;
+
+            uniqueCampaigns.forEach(e => {
+                const props = e.extendedProps;
+                const filterText = (props['필터'] || "").toUpperCase();
+                const targetValue = getTargetValue(props); // 안전한 타겟수 sum 추출 함수 적용
+
+                if (filterText.includes("TV")) { tvCount++; tvTargetSum += targetValue; }
+                if (filterText.includes("토스트")) { toastCount++; toastTargetSum += targetValue; }
+                if (filterText.includes("쿠폰")) { couponCount++; couponTargetSum += targetValue; }
+                if (filterText.includes("SEG") || filterText.includes("배너")) { segCount++; segTargetSum += targetValue; }
+            });
+
+            document.getElementById('startCount').innerText = starts;
+            document.getElementById('endCount').innerText = ends;
+            document.getElementById('tvCount').innerText = tvCount;
+            document.getElementById('toastCount').innerText = toastCount;
+            document.getElementById('couponCount').innerText = couponCount;
+            document.getElementById('segCount').innerText = segCount;
+
+            const formatToManOnly = (num) => {
+                if (!num || isNaN(num)) return "0만";
+                return Math.round(num / 10000).toLocaleString('ko-KR') + "만";
+            };
+
+            document.getElementById('tvTarget').innerText = `(${formatToManOnly(tvTargetSum)})`;
+            document.getElementById('toastTarget').innerText = `(${formatToManOnly(toastTargetSum)})`;
+            document.getElementById('couponTarget').innerText = `(${formatToManOnly(couponTargetSum)})`;
+            document.getElementById('segTarget').innerText = `(${formatToManOnly(segTargetSum)})`;
+        }
+
+        function showModalFromProps(p) {
+            document.getElementById('modalTitle').innerText = p['캠페인명'] || "제목 없음";
+            let bodyHtml = `<div><b>기간:</b> ${p._calStart} ~ ${p._calEnd}</div>`;
+            
+            Object.keys(p).forEach(key => {
+                if(!['type', 'start', 'end', 'allDay', 'title', 'sortOrder', '_calStart', '_calEnd', '캠페인명', '시작일', '종료일'].includes(key)) {
+                    const cleanedVal = p[key]; 
+                    if (cleanedVal) {
+                        bodyHtml += `<div><b>${key}:</b> ${cleanedVal}</div>`;
+                    }
+                }
+            });
+            
+            document.getElementById('modalBody').innerHTML = bodyHtml;
+            document.getElementById('eventModal').style.display = 'block';
+        }
+
+        function closeModal() { document.getElementById('eventModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
