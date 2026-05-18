@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset='utf-8' />
-    <title>B bt Campaign Dashboard V6.6 (Refined Light Version)</title>
+    <title>B tv Campaign Dashboard V6.7 (Modal Fixed & Compact Tooltip)</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
@@ -73,8 +73,6 @@
         .summary-group:not(:last-child) { border-right: 1px solid var(--border-color); padding-right: 25px; }
         .summary-item { color: #334155; }
         .summary-item b { color: var(--text-main); font-size: 15px; font-weight: 700; }
-        
-        /* [컬러 수정] 상단 요약/채널별 텍스트 색상을 진한 보라색으로 바꿈 */
         .summary-label { font-weight: 700; color: var(--start-color); margin-right: 6px; }
 
         /* 컨트롤 패널 필터 */
@@ -200,21 +198,21 @@
 
         /* 모달 레이아웃 */
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(6px); }
-        .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); margin: 8% auto; padding: 25px; width: 400px; border-radius: 18px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); color: var(--text-main); }
+        .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); margin: 8% auto; padding: 25px; width: 420px; border-radius: 18px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); color: var(--text-main); }
         
-        /* [컬러 수정] 세련된 투명 진한 회색배경 + 모든 글씨 무조건 검은색 호버 툴팁 */
+        /* [사이즈 수정] 더 콤팩트하고 작아진 연한 회색 호버 물방울 툴팁 */
         .hover-tooltip {
             position: absolute; z-index: 9999; display: none;
-            background: rgba(71, 85, 105, 0.95) !important; /* 투명도 있는 진한 회색 */
-            border: 1px solid rgba(51, 65, 85, 0.3);
-            padding: 10px 16px; width: auto; max-width: 550px; border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); backdrop-filter: blur(8px);
-            pointer-events: none; animation: fadeIn 0.15s ease;
-            font-size: 12px; line-height: 1.6; 
-            color: #000000 !important; /* 전체 글씨 검정 */
+            background: rgba(226, 232, 240, 0.96) !important; /* 투명도 있는 세련된 연한 회색 */
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px; width: auto; max-width: 480px; border-radius: 8px; /* 크기 및 패딩 축소 */
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); backdrop-filter: blur(8px);
+            pointer-events: none; animation: fadeIn 0.12s ease;
+            font-size: 11.5px; line-height: 1.5; /* 폰트 자간 최적화 */
+            color: #000000 !important; /* 전체 글씨 무조건 검정 */
         }
         
-        /* 툴팁 내부 강제 텍스트 블랙 지정 */
+        /* 툴팁 내부 텍스트 무조건 블랙 바인딩 */
         .hover-tooltip span, .hover-tooltip strong {
             color: #000000 !important;
         }
@@ -307,7 +305,7 @@
 
     <div id="eventModal" class="modal">
         <div class="modal-content">
-            <span style="float:right; cursor:pointer; font-weight:bold; color:var(--text-muted);" onclick="closeModal()">&times;</span>
+            <span style="float:right; cursor:pointer; font-weight:bold; color:var(--text-muted); font-size: 18px;" onclick="closeModal()">&times;</span>
             <div id="modalTitle" style="font-size:16px; font-weight:700; margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px; color:var(--text-main);"></div>
             <div id="modalBody" style="font-size:13.5px; line-height:1.7; color:#334155;"></div>
         </div>
@@ -393,10 +391,8 @@
             Object.keys(item).forEach(k => {
                 const normalizedKey = k.replace(/\s+/g, ''); 
                 if (normalizedKey === '타겟수' || normalizedKey === '타겟수(만)') {
-                    if (normalizedKey === '타겟수') {
-                        const cleanNum = String(item[k]).replace(/[^0-9]/g, '');
-                        if (cleanNum) targetValue = Number(cleanNum);
-                    }
+                    const cleanNum = String(item[k]).replace(/[^0-9]/g, '');
+                    if (cleanNum) targetValue = Number(cleanNum);
                 }
             });
             return targetValue;
@@ -529,6 +525,7 @@
             currentFilteredEvents = [...allEvents]; 
         }
 
+        /* [복구 완료] 날짜 칸을 클릭했을 때 나타나는 일일 타겟 요약 팝업창 */
         function showTargetSumModalOfDate(clickedDateStr) {
             const targetCampaigns = currentFilteredEvents.filter(e => {
                 return e.extendedProps.type === 'start' && e.start === clickedDateStr;
@@ -568,17 +565,17 @@
             const remainingSegCapa = 3000000 - segTargetSum;
             const segCapaFormatted = formatTargetNumber(remainingSegCapa < 0 ? 0 : remainingSegCapa);
 
-            let resultHtml = `
+            let contentHtml = `
                 <div class="modal-target-grid">
                     <div class="modal-target-card"><div class="modal-target-card-label">TV팝업</div><div class="modal-target-card-value">${formatTargetNumber(tvTargetSum)}</div></div>
                     <div class="modal-target-card"><div class="modal-target-card-label">토스트팝업</div><div class="modal-target-card-value">${formatTargetNumber(toastTargetSum)}</div></div>
                     <div class="modal-target-card"><div class="modal-target-card-label">쿠폰</div><div class="modal-target-card-value">${formatTargetNumber(couponTargetSum)}<span class="capa-text">(잔여: ${couponCapaFormatted})</span></div></div>
                     <div class="modal-target-card"><div class="modal-target-card-label">타겟배너(Seg)</div><div class="modal-target-card-value">${formatTargetNumber(segTargetSum)}<span class="capa-text">(잔여: ${segCapaFormatted})</span></div></div>
                 </div>
-                ${resultHtml}
+                ${listHtml}
             `;
 
-            document.getElementById('modalBody').innerHTML = resultHtml;
+            document.getElementById('modalBody').innerHTML = contentHtml;
             document.getElementById('eventModal').style.display = 'block';
         }
 
@@ -607,10 +604,10 @@
             });
 
             tooltip.innerHTML = `
-                <strong style="color:#000000 !important;">TV팝업:</strong> ${tvCount}건 (${formatTargetNumber(tvTargetSum)}) <span style="color:rgba(0,0,0,0.2)">|</span> 
-                <strong style="color:#000000 !important;">토스트팝업:</strong> ${toastCount}건 (${formatTargetNumber(toastTargetSum)}) <span style="color:rgba(0,0,0,0.2)">|</span> 
-                <strong style="color:#000000 !important;">쿠폰:</strong> ${couponCount}건 (${formatTargetNumber(couponTargetSum)}) <span style="color:rgba(0,0,0,0.2)">|</span> 
-                <strong style="color:#000000 !important;">타겟배너:</strong> ${segCount}건 (${formatTargetNumber(segTargetSum)})
+                <strong style="color:#000000 !important;">TV:</strong> ${tvCount}건 (${formatTargetNumber(tvTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
+                <strong style="color:#000000 !important;">토스트:</strong> ${toastCount}건 (${formatTargetNumber(toastTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
+                <strong style="color:#000000 !important;">쿠폰:</strong> ${couponCount}건 (${formatTargetNumber(couponTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
+                <strong style="color:#000000 !important;">배너:</strong> ${segCount}건 (${formatTargetNumber(segTargetSum)})
             `;
 
             positionTooltip(event);
@@ -621,14 +618,14 @@
             const tooltip = document.getElementById('dateHoverTooltip');
             if(!tooltip || tooltip.style.display === 'none') return;
             
-            let x = e.pageX + 15;
-            let y = e.pageY + 15;
+            let x = e.pageX + 12;
+            let y = e.pageY + 12;
             
             if (x + tooltip.offsetWidth > window.innerWidth + window.scrollX) {
-                x = e.pageX - tooltip.offsetWidth - 15;
+                x = e.pageX - tooltip.offsetWidth - 12;
             }
             if (y + tooltip.offsetHeight > window.innerHeight + window.scrollY) {
-                y = e.pageY - tooltip.offsetHeight - 15;
+                y = e.pageY - tooltip.offsetHeight - 12;
             }
 
             tooltip.style.left = x + 'px';
