@@ -8,13 +8,13 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
     <style>
         :root {
-            /* 레퍼런스 사이트 감성의 프리미엄 라이트톤 스키마 */
-            --bg-main: #f8fafc;        /* 전체 배경 (차분하고 매끄러운 연회색) */
-            --bg-card: #ffffff;        /* 카드 및 컨테이너 배경 (순백색) */
-            --bg-card-inner: #f1f5f9;  /* 필터 칩 및 내부 요소 배경 */
-            --text-main: #0f172a;      /* 주 텍스트 (짙은 슬레이트 차콜) */
-            --text-muted: #64748b;     /* 보조 텍스트 (은은한 회색) */
-            --border-color: #e2e8f0;   /* 선/테두리 색상 (연한 회색) */
+            /* 프리미엄 라이트톤 스키마 */
+            --bg-main: #f8fafc;        /* 전체 배경 */
+            --bg-card: #ffffff;        /* 카드 및 컨테이너 배경 */
+            --bg-card-inner: #f1f5f9;  /* 내부 요소 배경 */
+            --text-main: #0f172a;      /* 주 텍스트 */
+            --text-muted: #64748b;     /* 보조 텍스트 */
+            --border-color: #e2e8f0;   /* 선/테두리 색상 */
             
             --start-color: #a855f7;    /* 시작 캠페인 포인트: 세련된 퍼플 */
             --end-color: #64748b;      /* 종료 캠페인 포인트: 차분한 슬레이트 그레이 */
@@ -73,7 +73,9 @@
         .summary-group:not(:last-child) { border-right: 1px solid var(--border-color); padding-right: 25px; }
         .summary-item { color: #334155; }
         .summary-item b { color: var(--text-main); font-size: 15px; font-weight: 700; }
-        .summary-label { font-weight: 600; color: var(--accent-blue); margin-right: 6px; }
+        
+        /* [컬러 수정] 상단 요약/채널별 텍스트 색상을 진한 보라색으로 바꿈 */
+        .summary-label { font-weight: 700; color: var(--start-color); margin-right: 6px; }
 
         /* 컨트롤 패널 필터 */
         .control-panel { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
@@ -112,7 +114,7 @@
         .filter-dot.start { background-color: var(--start-color); }
         .filter-dot.end { background-color: var(--end-color); }
 
-        /* FullCalendar 테마 오버라이딩 (고급 라이트 스타일) */
+        /* FullCalendar 테마 오버라이딩 */
         #calendar {
             background-color: var(--bg-card); padding: 20px; border-radius: 14px; 
             border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
@@ -126,27 +128,23 @@
         .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 600 !important; color: #475569 !important; padding: 8px !important; }
         .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13px !important; font-weight: 600 !important; padding: 10px 0 !important; color: #475569; }
         
-        /* 주말 디자인 톤 매칭 */
         .fc-day-sat .fc-daygrid-day-number { color: #0284c7 !important; }
         .fc-day-sun .fc-daygrid-day-number { color: #ea580c !important; }
 
-        /* FullCalendar 버튼 컴포넌트 */
         .fc .fc-button-primary { background-color: var(--bg-card) !important; border-color: var(--border-color) !important; color: var(--text-main) !important; font-weight: 600 !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important; }
         .fc .fc-button-primary:hover { background-color: var(--bg-card-inner) !important; border-color: #cbd5e1 !important; }
         .fc .fc-button-primary:disabled { background-color: #f1f5f9 !important; border-color: #e2e8f0 !important; opacity: 0.6; color: #94a3b8 !important; }
         .fc .fc-button-active { background-color: #e0f2fe !important; border-color: var(--accent-blue) !important; color: var(--accent-blue) !important; }
         .fc-daygrid-more-link { font-size: 11px !important; font-weight: 600 !important; color: var(--accent-blue) !important; }
         
-        /* 캘린더 내부 일정 막대 서식 (왼쪽 끝 포인트 팁 디자인) */
+        /* 캘린더 내부 일정 막대 디자인 */
         .fc-event { cursor: pointer; padding: 3px 6px; border-radius: 4px !important; border: none !important; margin-bottom: 2px !important; transition: opacity 0.15s; }
         .fc-event:hover { opacity: 0.85; }
         .fc-event-title { font-weight: 600 !important; font-size: 11px; }
         
-        /* 시작 캠페인: 연보라 배경 + 왼쪽 쨍한 보라색 포인트 팁 + 짙은 보라색 글씨 */
         .event-start { background-color: #f3ebf7 !important; border-left: 3px solid var(--start-color) !important; }
         .event-start .fc-event-title { color: #6b21a8 !important; }
         
-        /* 종료 캠페인: 연회색 배경 + 왼쪽 진한 회색 포인트 팁 + 차분한 회색 글씨 */
         .event-end { background-color: #f1f5f9 !important; border-left: 3px solid var(--end-color) !important; }
         .event-end .fc-event-title { color: #475569 !important; }
 
@@ -200,18 +198,25 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 모달 및 툴팁 디자인 고도화 (글래스모피즘 라이트 스타일) */
+        /* 모달 레이아웃 */
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(6px); }
         .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); margin: 8% auto; padding: 25px; width: 400px; border-radius: 18px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); color: var(--text-main); }
         
-        /* 세련된 라이트 글래스모피즘 호버 툴팁 */
+        /* [컬러 수정] 세련된 투명 진한 회색배경 + 모든 글씨 무조건 검은색 호버 툴팁 */
         .hover-tooltip {
             position: absolute; z-index: 9999; display: none;
-            background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8);
+            background: rgba(71, 85, 105, 0.95) !important; /* 투명도 있는 진한 회색 */
+            border: 1px solid rgba(51, 65, 85, 0.3);
             padding: 10px 16px; width: auto; max-width: 550px; border-radius: 10px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.05); backdrop-filter: blur(12px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); backdrop-filter: blur(8px);
             pointer-events: none; animation: fadeIn 0.15s ease;
-            font-size: 12px; line-height: 1.6; color: var(--text-main);
+            font-size: 12px; line-height: 1.6; 
+            color: #000000 !important; /* 전체 글씨 검정 */
+        }
+        
+        /* 툴팁 내부 강제 텍스트 블랙 지정 */
+        .hover-tooltip span, .hover-tooltip strong {
+            color: #000000 !important;
         }
         
         .modal-target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -602,10 +607,10 @@
             });
 
             tooltip.innerHTML = `
-                <span style="color:var(--accent-purple); font-weight:700;">TV팝업:</span> ${tvCount}건 (${formatTargetNumber(tvTargetSum)}) <span style="color:var(--border-color)">|</span> 
-                <span style="color:var(--accent-purple); font-weight:700;">토스트팝업:</span> ${toastCount}건 (${formatTargetNumber(toastTargetSum)}) <span style="color:var(--border-color)">|</span> 
-                <span style="color:var(--accent-purple); font-weight:700;">쿠폰:</span> ${couponCount}건 (${formatTargetNumber(couponTargetSum)}) <span style="color:var(--border-color)">|</span> 
-                <span style="color:var(--accent-purple); font-weight:700;">타겟배너:</span> ${segCount}건 (${formatTargetNumber(segTargetSum)})
+                <strong style="color:#000000 !important;">TV팝업:</strong> ${tvCount}건 (${formatTargetNumber(tvTargetSum)}) <span style="color:rgba(0,0,0,0.2)">|</span> 
+                <strong style="color:#000000 !important;">토스트팝업:</strong> ${toastCount}건 (${formatTargetNumber(toastTargetSum)}) <span style="color:rgba(0,0,0,0.2)">|</span> 
+                <strong style="color:#000000 !important;">쿠폰:</strong> ${couponCount}건 (${formatTargetNumber(couponTargetSum)}) <span style="color:rgba(0,0,0,0.2)">|</span> 
+                <strong style="color:#000000 !important;">타겟배너:</strong> ${segCount}건 (${formatTargetNumber(segTargetSum)})
             `;
 
             positionTooltip(event);
