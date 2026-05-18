@@ -11,7 +11,7 @@
             --apple-bg: #ffffff;
             --apple-text: #1d1d1f;
             --apple-gray: #f5f5f7;
-            --start-color: #5A2B8D; /* SK브로드밴드 로고색 느낌의 진한 보라색 */
+            --start-color: #5A2B8D; /* 쨍하고 진한 보라색 */
             --end-color: #555555;   /* 진한 회색 */
             --apple-blue: #0071e3;
             --hyundai-navy: #00287a;
@@ -99,17 +99,15 @@
         .fc .fc-button { padding: 4px 10px !important; font-size: 11px !important; height: auto !important; }
         .fc-daygrid-more-link { font-size: 10px !important; font-weight: 500 !important; color: #6e6e73 !important; }
         
-        /* [컬러 수정] 캘린더 내부 일정 색상 변경 */
+        /* 캘린더 내부 일정 디자인 (원래 스타일 복구 및 색상 적용) */
         .fc-event { cursor: pointer; padding: 2px 4px; border-radius: 4px !important; border: none !important; margin-bottom: 1px !important; }
-        .fc-event-title { font-weight: 600 !important; font-size: 11px; }
+        .fc-event-title { font-weight: 600 !important; font-size: 11px; color: #000 !important; }
         
-        /* 시작 캠페인: 진한 보라색 배경 + 흰색 글씨 */
-        .event-start { background-color: var(--start-color) !important; border-left: 3px solid #D1C4E9 !important; }
-        .event-start .fc-event-title { color: #ffffff !important; }
+        /* 시작 캠페인: 연보라 배경 + 왼쪽 쨍한 보라색 포인트 팁 */
+        .event-start { background-color: #f3ebf7 !important; border-left: 3px solid var(--start-color) !important; }
         
-        /* 종료 캠페인: 진한 회색 배경 + 흰색 글씨 */
-        .event-end { background-color: var(--end-color) !important; border-left: 3px solid #E0E0E0 !important; }
-        .event-end .fc-event-title { color: #ffffff !important; }
+        /* 종료 캠페인: 연회색 배경 + 왼쪽 진한 회색 포인트 팁 */
+        .event-end { background-color: #f2f2f7 !important; border-left: 3px solid var(--end-color) !important; }
 
         #ganttContainer { display: none; margin-top: 10px; animation: fadeIn 0.3s ease; }
         .gantt-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
@@ -162,7 +160,7 @@
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); }
         .modal-content { background: white; margin: 5% auto; padding: 25px; width: 380px; border-radius: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
         
-        /* 호버 툴팁 스타일 최적화 (가로폭을 텍스트에 맞게 넓히고 여백 조절) */
+        /* 호버 툴팁 스타일 */
         .hover-tooltip {
             position: absolute; z-index: 9999; display: none;
             background: rgba(255, 255, 255, 0.98); border: 1px solid #d2d2d7;
@@ -535,7 +533,6 @@
             document.getElementById('eventModal').style.display = 'block';
         }
 
-        /* [요청 사항 반영] 한 줄 형태의 깔끔한 물방울 툴팁 포맷팅 */
         function showTargetSumTooltip(dateObj, event) {
             const offset = dateObj.getTimezoneOffset() * 60000;
             const clickedDateStr = new Date(dateObj.getTime() - offset).toISOString().split('T')[0];
@@ -560,7 +557,6 @@
                 if (filterVal.includes("SEG") || filterVal.includes("배너")) { segCount++; segTargetSum += targetValue; }
             });
 
-            // 지정해주신 문자열 양식대로 출력 구조 생성
             tooltip.innerHTML = `
                 <strong>TV팝업:</strong> ${tvCount}건 (${formatTargetNumber(tvTargetSum)}) | 
                 <strong>토스트팝업:</strong> ${toastCount}건 (${formatTargetNumber(toastTargetSum)}) | 
