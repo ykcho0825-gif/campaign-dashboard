@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset='utf-8' />
-    <title>B tv Campaign Dashboard V7.0 (Advanced Features Integrated)</title>
+    <title>B tv Campaign Dashboard V6.7 (Modal Fixed & Compact Tooltip)</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
@@ -24,15 +24,6 @@
             
             --gantt-bar-bg: #e2e8f0;
             --gantt-bar-border: #94a3b8;
-
-            /* 배정 상태 색상 정의 */
-            --status-assigned-bg: #e0f2fe;
-            --status-assigned-border: #0284c7;
-            --status-assigned-text: #0369a1;
-            
-            --status-pending-bg: #fef3c7;
-            --status-pending-border: #d97706;
-            --status-pending-text: #b45309;
         }
 
         body {
@@ -59,20 +50,18 @@
         .action-section { display: flex; gap: 12px; align-items: center; }
         .search-input { 
             padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border-color); 
-            background-color: var(--bg-card); color: var(--text-main); font-size: 13px; width: 220px; 
+            background-color: var(--bg-card); color: var(--text-main); font-size: 13px; width: 240px; 
             outline: none; transition: all 0.2s ease;
         }
         .search-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15); }
         
-        .toggle-btn, .download-btn {
+        .toggle-btn {
             padding: 9px 18px; background-color: var(--bg-card); border: 1px solid var(--border-color);
             color: var(--text-main); border-radius: 8px; font-size: 13px; font-weight: 600;
             cursor: pointer; transition: all 0.2s ease; user-select: none;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .toggle-btn:hover, .download-btn:hover { background-color: var(--bg-card-inner); border-color: #cbd5e1; }
-        .download-btn { background-color: #f0fdf4; border-color: #bbf7d0; color: #166534; }
-        .download-btn:hover { background-color: #dcfce7; border-color: #86efac; }
+        .toggle-btn:hover { background-color: var(--bg-card-inner); border-color: #cbd5e1; }
 
         /* 요약 바 현황판 */
         .summary-bar {
@@ -87,7 +76,7 @@
         .summary-label { font-weight: 700; color: var(--start-color); margin-right: 6px; }
 
         /* 컨트롤 패널 필터 */
-        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
         .filter-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
         .filter-wrapper { display: flex; flex-direction: column; gap: 4px; }
         .filter-section { display: flex; gap: 10px; align-items: center; }
@@ -100,10 +89,6 @@
         .filter-chip:hover { border-color: #cbd5e1; color: var(--text-main); }
         .filter-chip input { display: none; }
         .filter-chip:has(input:checked) { background: #e0f2fe; border-color: var(--accent-blue); color: var(--accent-blue); font-weight: 700; }
-
-        /* 배정 상태 필터용 스타일 */
-        .filter-chip.status-chip:has(input[value="배정완료"]:checked) { background: var(--status-assigned-bg); border-color: var(--status-assigned-border); color: var(--status-assigned-text); }
-        .filter-chip.status-chip:has(input[value="배정대기"]:checked) { background: var(--status-pending-bg); border-color: var(--status-pending-border); color: var(--status-pending-text); }
 
         .checkbox-label {
             display: inline-flex; align-items: center; gap: 8px; font-size: 12px;
@@ -161,13 +146,6 @@
         .event-end { background-color: #f1f5f9 !important; border-left: 3px solid var(--end-color) !important; }
         .event-end .fc-event-title { color: #475569 !important; }
 
-        /* 배정 상태 오버레이 (캘린더 인디케이터용) */
-        .event-status-tag {
-            font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold; margin-right: 4px; display: inline-block;
-        }
-        .tag-assigned { background-color: var(--status-assigned-border); color: #ffffff; }
-        .tag-pending { background-color: var(--status-pending-border); color: #ffffff; }
-
         /* 간트차트 뷰 레이아웃 */
         #ganttContainer { display: none; margin-top: 10px; animation: fadeIn 0.3s ease; }
         .gantt-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
@@ -201,7 +179,7 @@
         .gantt-row { border-bottom: 1px solid var(--border-color); min-height: 44px; background: var(--bg-card); transition: background 0.15s; }
         .gantt-row:hover { background: #f8fafc; }
         .gantt-row:last-child { border-bottom: none; }
-        .gantt-title-cell { font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+        .gantt-title-cell { font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .gantt-grid-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; pointer-events: none; z-index: 1; box-sizing: border-box; }
         .gantt-cell-col { box-sizing: border-box; height: 100%; border-right: none !important; }
@@ -214,11 +192,6 @@
             cursor: pointer; transition: transform 0.1s, background-color 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.04);
         }
         .gantt-bar:hover { transform: scale(1.005); background: #cbd5e1; border-left-color: var(--accent-blue); }
-        
-        /* 간트차트 배정상태별 바 색상 분기 */
-        .gantt-bar.status-assigned { background: var(--status-assigned-bg); border-left-color: var(--status-assigned-border); color: var(--status-assigned-text); }
-        .gantt-bar.status-pending { background: var(--status-pending-bg); border-left-color: var(--status-pending-border); color: var(--status-pending-text); }
-        
         .gantt-empty-msg { text-align: center; color: var(--text-muted); padding: 50px 0; font-size: 13px; width: 100%; background: var(--bg-card); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -260,7 +233,6 @@
             <div class="title-section"><h2>B tv Campaign Dashboard</h2></div>
             <div class="action-section">
                 <input type="text" id="eventSearch" class="search-input" placeholder="캠페인명 검색...">
-                <button id="downloadCsvBtn" class="download-btn" onclick="exportToCSV()">엑셀 다운로드</button>
                 <button id="viewToggleBtn" class="toggle-btn" onclick="toggleViewMode()">목록 보기</button>
             </div>
         </div>
@@ -291,15 +263,7 @@
                 </div>
             </div>
 
-            <div class="filter-wrapper">
-                <div class="filter-title">배정 상태 필터</div>
-                <div class="filter-section">
-                    <label class="filter-chip status-chip"><input type="checkbox" class="status-filter" value="배정완료"> 배정완료</label>
-                    <label class="filter-chip status-chip"><input type="checkbox" class="status-filter" value="배정대기"> 배정대기</label>
-                </div>
-            </div>
-
-            <div class="filter-wrapper" style="align-items: flex-end; margin-left: auto;">
+            <div class="filter-wrapper" style="align-items: flex-end;">
                 <div class="filter-title" style="align-self: flex-end;">일정 종류 필터</div>
                 <div class="filter-section" style="gap: 12px;">
                     <label class="checkbox-label">
@@ -350,12 +314,6 @@
     <script>
         const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJDqgcPmC1RsB_57OgHxXZ9uqKNiGDICkSKqftjk6CbflfyhVWA2G0LrqLBwuQtTNsffKBtc-aKbD0/pub?output=csv';
 
-        // 동적 월별 기본 Capa 기준 정의 (필요시 시트 확장 연동 가능 구조)
-        const CAPA_LIMITS = {
-            COUPON: 2700000,
-            SEG: 3000000
-        };
-
         let rawSourceData = []; 
         let allEvents = [];
         let calendar;
@@ -366,7 +324,6 @@
             fetchDataFromCSV();
 
             document.querySelectorAll('.type-filter').forEach(cb => cb.addEventListener('change', applyFilters));
-            document.querySelectorAll('.status-filter').forEach(cb => cb.addEventListener('change', applyFilters));
             document.querySelectorAll('.date-filter').forEach(cb => cb.addEventListener('change', applyFilters));
             document.getElementById('eventSearch').addEventListener('input', applyFilters);
         });
@@ -441,18 +398,6 @@
             return targetValue;
         }
 
-        function getStatusValue(item) {
-            // 시트 컬럼명 중 '배정상태', '상태', '배정' 문자열 포함 여부 체크 자동 매핑
-            let status = "배정완료"; // 기본값
-            Object.keys(item).forEach(k => {
-                const normalizedKey = k.replace(/\s+/g, '');
-                if (normalizedKey === '배정상태' || normalizedKey === '상태') {
-                    if (item[k]) status = item[k].trim();
-                }
-            });
-            return status;
-        }
-
         function toggleViewMode() {
             const calEl = document.getElementById('calendar');
             const ganttEl = document.getElementById('ganttContainer');
@@ -473,9 +418,7 @@
                 ganttEl.style.display = 'none';
                 calEl.style.display = 'block';
                 btn.innerText = '목록 보기'; 
-                if(calendar) {
-                    calendar.render(); 
-                }
+                if(calendar) calendar.render(); 
                 applyFilters();
             }
         }
@@ -485,10 +428,6 @@
             if (action === 'prev') { calendar.prev(); } 
             else if (action === 'next') { calendar.next(); } 
             else if (action === 'today') { calendar.today(); }
-            
-            // [개선] 간트 모드에서 내비게이션 시 타이틀 및 차트 실시간 양방향 동기화 리렌더링
-            updateGanttTitle();
-            applyFilters();
         }
 
         function updateGanttTitle() {
@@ -515,16 +454,14 @@
                 const startVal = cleanDateStr(event['시작일']);
                 const endVal = cleanDateStr(event['종료일']) || startVal;
                 const titleVal = event['캠페인명'] || "제목 없음";
-                const statusVal = getStatusValue(event);
 
-                // FullCalendar 타이틀에 배정 상태별 이모지/텍스트 조합을 삽입하기 위한 분기 로직용 인자 설정
                 if (startVal) {
                     processed.push({ 
                         title: titleVal, 
                         start: startVal, 
                         allDay: true,
                         className: 'event-start', 
-                        extendedProps: { ...event, type: 'start', sortOrder: 1, _calStart: startVal, _calEnd: endVal, _status: statusVal } 
+                        extendedProps: { ...event, type: 'start', sortOrder: 1, _calStart: startVal, _calEnd: endVal } 
                     });
 
                     if (endVal && startVal !== endVal) {
@@ -533,7 +470,7 @@
                             start: endVal, 
                             allDay: true,
                             className: 'event-end', 
-                            extendedProps: { ...event, type: 'end', sortOrder: 2, _calStart: startVal, _calEnd: endVal, _status: statusVal } 
+                            extendedProps: { ...event, type: 'end', sortOrder: 2, _calStart: startVal, _calEnd: endVal } 
                         });
                     }
                 }
@@ -557,28 +494,6 @@
                 },
                 dateClick: function(info) {
                     showTargetSumModalOfDate(info.dateStr);
-                },
-                // [개선] 캘린더 엘리먼트 렌더링 시 배정상태에 따른 전면 가시성 배지 프리펜드 기능 추가
-                eventContent: function(arg) {
-                    let status = arg.event.extendedProps._status || "배정완료";
-                    let isStart = arg.event.extendedProps.type === 'start';
-                    let tagClass = (status === '배정완료') ? 'tag-assigned' : 'tag-pending';
-                    let tagText = (status === '배정완료') ? '배정' : '대기';
-                    
-                    let arrayOfDomNodes = [];
-                    if(isStart) {
-                        let spanTag = document.createElement('span');
-                        spanTag.className = `event-status-tag ${tagClass}`;
-                        spanTag.innerText = tagText;
-                        arrayOfDomNodes.push(spanTag);
-                    }
-                    
-                    let titleSpan = document.createElement('span');
-                    titleSpan.className = 'fc-event-title';
-                    titleSpan.innerText = arg.event.title;
-                    arrayOfDomNodes.push(titleSpan);
-                    
-                    return { domNodes: arrayOfDomNodes };
                 },
                 dayCellDidMount: function(info) {
                     const cellEl = info.el;
@@ -610,6 +525,7 @@
             currentFilteredEvents = [...allEvents]; 
         }
 
+        /* [복구 완료] 날짜 칸을 클릭했을 때 나타나는 일일 타겟 요약 팝업창 */
         function showTargetSumModalOfDate(clickedDateStr) {
             const targetCampaigns = currentFilteredEvents.filter(e => {
                 return e.extendedProps.type === 'start' && e.start === clickedDateStr;
@@ -634,22 +550,19 @@
                 const props = c.extendedProps;
                 const filterVal = (props['필터'] || "").toUpperCase(); 
                 const targetValue = getTargetValue(props); 
-                const statusVal = props._status || "배정완료";
 
                 if (filterVal.includes("TV")) { tvTargetSum += targetValue; }
                 if (filterVal.includes("토스트")) { toastTargetSum += targetValue; }
                 if (filterVal.includes("쿠폰")) { couponTargetSum += targetValue; }
                 if (filterVal.includes("SEG") || filterVal.includes("배너")) { segTargetSum += targetValue; }
 
-                let statusBadge = `<span style="font-size:10px; font-weight:bold; margin-left:4px; color:${statusVal==='배정완료'?'var(--status-assigned-border)':'var(--status-pending-border)'}">[${statusVal}]</span>`;
-                listHtml += `<li style="margin-bottom:4px;">${c.title} <span style="color:var(--text-muted);">(${formatTargetNumber(targetValue)})</span> ${statusBadge}</li>`;
+                listHtml += `<li style="margin-bottom:4px;">${c.title} <span style="color:var(--text-muted);">(${formatTargetNumber(targetValue)})</span></li>`;
             });
             listHtml += `</ul>`;
 
-            // [개선] 동적 Capa 연동 잔여 캡파 연산
-            const remainingCouponCapa = CAPA_LIMITS.COUPON - couponTargetSum;
+            const remainingCouponCapa = 2700000 - couponTargetSum;
             const couponCapaFormatted = formatTargetNumber(remainingCouponCapa < 0 ? 0 : remainingCouponCapa);
-            const remainingSegCapa = CAPA_LIMITS.SEG - segTargetSum;
+            const remainingSegCapa = 3000000 - segTargetSum;
             const segCapaFormatted = formatTargetNumber(remainingSegCapa < 0 ? 0 : remainingSegCapa);
 
             let contentHtml = `
@@ -693,7 +606,7 @@
             tooltip.innerHTML = `
                 <strong style="color:#000000 !important;">TV:</strong> ${tvCount}건 (${formatTargetNumber(tvTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
                 <strong style="color:#000000 !important;">토스트:</strong> ${toastCount}건 (${formatTargetNumber(toastTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
-                <strong style="color:#000000 !important;">쿠폰:</strong> ${couponCount}건 (${formatTargetNumber(couponCount === 0 ? 0 : couponTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
+                <strong style="color:#000000 !important;">쿠폰:</strong> ${couponCount}건 (${formatTargetNumber(couponTargetSum)}) <span style="color:rgba(0,0,0,0.12)">|</span> 
                 <strong style="color:#000000 !important;">배너:</strong> ${segCount}건 (${formatTargetNumber(segTargetSum)})
             `;
 
@@ -726,7 +639,6 @@
 
         function applyFilters() {
             const activeFilters = Array.from(document.querySelectorAll('.type-filter:checked')).map(el => el.value);
-            const activeStatusFilters = Array.from(document.querySelectorAll('.status-filter:checked')).map(el => el.value);
             const activeDateFilters = Array.from(document.querySelectorAll('.date-filter:checked')).map(el => el.value);
             const searchText = document.getElementById('eventSearch').value.toUpperCase();
             
@@ -734,16 +646,10 @@
                 const p = event.extendedProps;
                 const title = (event.title || "").toUpperCase();
                 const filterText = (p['필터'] || "").toUpperCase(); 
-                const statusText = p._status || "배정완료";
                 
                 const matchesSearch = title.includes(searchText);
                 const matchesDateType = activeDateFilters.includes(p.type);
                 
-                // [개선] 배정상태 필터 분기 로직 적용
-                let matchesStatus = false;
-                if (activeStatusFilters.length === 0) { matchesStatus = true; }
-                else { matchesStatus = activeStatusFilters.includes(statusText); }
-
                 let matchesType = false;
                 if (activeFilters.length === 0) { matchesType = true; } 
                 else {
@@ -753,18 +659,18 @@
                     const hasSeg = activeFilters.includes("Seg채널") && (filterText.includes("SEG") || filterText.includes("배너"));
                     matchesType = hasTV || hasToast || hasCoupon || hasSeg;
                 }
-                return matchesSearch && matchesDateType && matchesType && matchesStatus;
+                return matchesSearch && matchesDateType && matchesType;
             });
 
             if(calendar) {
                 calendar.removeAllEvents();
                 calendar.addEventSource(currentFilteredEvents);
             }
-            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, activeStatusFilters, searchText); }
+            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText); }
             updateSummary(currentFilteredEvents);
         }
 
-        function renderGanttChart(activeFilters, activeStatusFilters, searchText) {
+        function renderGanttChart(activeFilters, searchText) {
             const headerTimeline = document.getElementById('ganttHeaderTimeline');
             const rowsContainer = document.getElementById('ganttRowsContainer');
             
@@ -805,12 +711,8 @@
             itemsToRender.forEach(item => {
                 const title = item['campaign_name'] || item['캠페인명'] || "제목 없음";
                 const filterText = (item['필터'] || "").toUpperCase();
-                const statusText = getStatusValue(item);
                 
                 if (searchText && !title.toUpperCase().includes(searchText)) return;
-
-                // [개선] 배정 상태 필터 조건 적용
-                if (activeStatusFilters.length > 0 && !activeStatusFilters.includes(statusText)) return;
 
                 if (activeFilters.length > 0) {
                     const hasTV = activeFilters.includes("TV") && filterText.includes("TV");
@@ -845,10 +747,7 @@
 
                 const titleCell = document.createElement('div');
                 titleCell.className = 'gantt-label-col gantt-title-cell';
-                
-                // [개선] 간트 목록 명칭 앞에 배정여부 텍스트 배지 삽입
-                let badgeStyle = `font-size:10px; padding:2px 5px; border-radius:4px; font-weight:bold; color:#ffffff; background:${statusText==='배정완료'?'var(--status-assigned-border)':'var(--status-pending-border)'}`;
-                titleCell.innerHTML = `<span style="${badgeStyle}">${statusText==='배정완료'?'배정':'대기'}</span> <span style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" title="${title}">${title}</span>`;
+                titleCell.innerText = title; titleCell.title = title;
                 row.appendChild(titleCell);
 
                 const timelineCol = document.createElement('div');
@@ -867,13 +766,11 @@
                 barContainer.className = 'gantt-bar-container';
 
                 const bar = document.createElement('div');
-                // [개선] 상태값 분기에 의한 간트 막대 색상 실시간 연동 클래스 추가
-                let statusBarClass = (statusText === '배정완료') ? 'status-assigned' : 'status-pending';
-                bar.className = `gantt-bar ${statusBarClass}`;
+                bar.className = 'gantt-bar';
                 bar.style.left = `${leftPosition}%`; bar.style.width = `${barWidth}%`;
-                bar.innerText = title; bar.title = `${title} (${sDateStr} ~ ${eDateStr}) [${statusText}]`;
+                bar.innerText = title; bar.title = `${title} (${sDateStr} ~ ${eDateStr})`;
 
-                const extendedPropsObj = { ...item, _calStart: sDateStr, _calEnd: eDateStr, _status: statusText };
+                const extendedPropsObj = { ...item, _calStart: sDateStr, _calEnd: eDateStr };
                 bar.onclick = (e) => { e.stopPropagation(); showModalFromProps(extendedPropsObj); };
 
                 barContainer.appendChild(bar);
@@ -938,13 +835,8 @@
             document.getElementById('modalTitle').innerText = p['캠페인명'] || "제목 없음";
             let bodyHtml = `<div><b>기간:</b> ${p._calStart} ~ ${p._calEnd}</div>`;
             
-            // 배정상태 최상단 추가 노출
-            let statusVal = p._status || "배정완료";
-            let colorCode = (statusVal === '배정완료') ? 'var(--status-assigned-border)' : 'var(--status-pending-border)';
-            bodyHtml += `<div><b>배정 상태:</b> <span style="color:${colorCode}; font-weight:bold;">${statusVal}</span></div>`;
-
             Object.keys(p).forEach(key => {
-                if(!['type', 'start', 'end', 'allDay', 'title', 'sortOrder', '_calStart', '_calEnd', '_status', '캠페인명', '시작일', '종료일', '배정상태', '상태'].includes(key)) {
+                if(!['type', 'start', 'end', 'allDay', 'title', 'sortOrder', '_calStart', '_calEnd', '캠페인명', '시작일', '종료일'].includes(key)) {
                     const normalizedKey = key.replace(/\s+/g, '');
                     if (normalizedKey !== '타겟수' && normalizedKey !== '채널' && normalizedKey !== '쿠폰') {
                         const cleanedVal = p[key]; 
@@ -961,48 +853,6 @@
         }
 
         function closeModal() { document.getElementById('eventModal').style.display = 'none'; }
-
-        // [개선] 엑셀 다운로드 (CSV 추출 및 파일 강제 트리거 다운로드 API)
-        function exportToCSV() {
-            // 현재 활성화되어 있는 필터링 아이템들(시작일 기준 고유 데이터)만 선별 추출
-            const uniqueFilteredCampaigns = currentFilteredEvents.filter(e => e.extendedProps.type === 'start');
-            
-            if(uniqueFilteredCampaigns.length === 0) {
-                alert("현재 필터링된 조건의 캠페인 리스트 데이터가 존재하지 않습니다.");
-                return;
-            }
-
-            // CSV 헤더 정의
-            let csvContent = "\uFEFF"; // Excel 한글 깨짐 방지를 위한 BOM 문자열 주입
-            csvContent += "캠페인명,시작일,종료일,채널유형,타겟수,배정상태\n";
-
-            uniqueFilteredCampaigns.forEach(c => {
-                const props = c.extendedProps;
-                const title = (c.title || "제목 없음").replace(/,/g, ""); // 쉽표 치환 
-                const start = props._calStart || "";
-                const end = props._calEnd || "";
-                const channel = (props['필터'] || "").replace(/,/g, "");
-                const target = getTargetValue(props);
-                const status = props._status || "배정완료";
-
-                csvContent += `${title},${start},${end},${channel},${target},${status}\n`;
-            });
-
-            // 임시 링크 오브젝트 생성하여 가상 다운로드 클릭 이벤트 발생시킴
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            
-            // 파일명 명명 규칙: B_tv_Campaigns_YYYY-MM-DD.csv
-            const todayStr = new Date().toISOString().split('T')[0];
-            link.setAttribute("href", url);
-            link.setAttribute("download", `B_tv_Campaign_Filter_Report_${todayStr}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
     </script>
 </body>
 </html>
