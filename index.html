@@ -332,7 +332,7 @@
             const lines = csvText.split(/\r?\n/);
             if (lines.length === 0) return [];
 
-            const headers = parseCSVLine(lines[0]);
+            const headers = parseCSVLine(lines[0]).map(h => h.replace(/^\uFEFF/, '').trim());
             const result = [];
 
             for (let i = 1; i < lines.length; i++) {
@@ -341,7 +341,7 @@
                 const obj = {};
                 
                 headers.forEach((header, index) => {
-                    obj[header.trim()] = currentLine[index] ? currentLine[index].trim() : "";
+                    obj[header] = currentLine[index] ? currentLine[index].trim() : "";
                 });
                 result.push(obj);
             }
@@ -396,6 +396,20 @@
                 }
             });
             return targetValue;
+        }
+
+        function getCampaignTitle(item) {
+            if (!item) return "제목 없음";
+            const directTitle = item['캠페인명'] || item['campaign_name'] || item['Campaign Name'] || item['제목'] || item['Title'];
+            if (directTitle && String(directTitle).trim()) return String(directTitle).trim();
+
+            // 스프레드시트의 A열 값을 제목으로 사용합니다. 헤더명이 바뀌거나 BOM이 섞여도 A열을 우선 참조합니다.
+            const keys = Object.keys(item).filter(k => !k.startsWith('_') && !['type', 'sortOrder'].includes(k));
+            if (keys.length > 0) {
+                const firstColumnValue = item[keys[0]];
+                if (firstColumnValue && String(firstColumnValue).trim()) return String(firstColumnValue).trim();
+            }
+            return "제목 없음";
         }
 
         function toggleViewMode() {
@@ -453,7 +467,7 @@
             data.forEach(event => {
                 const startVal = cleanDateStr(event['시작일']);
                 const endVal = cleanDateStr(event['종료일']) || startVal;
-                const titleVal = event['캠페인명'] || "제목 없음";
+                const titleVal = getCampaignTitle(event);
 
                 if (startVal) {
                     processed.push({ 
@@ -709,7 +723,7 @@
             let renderCount = 0;
 
             itemsToRender.forEach(item => {
-                const title = item['campaign_name'] || item['캠페인명'] || "제목 없음";
+                const title = getCampaignTitle(item);
                 const filterText = (item['필터'] || "").toUpperCase();
                 
                 if (searchText && !title.toUpperCase().includes(searchText)) return;
@@ -832,7 +846,7 @@
         }
 
         function showModalFromProps(p) {
-            document.getElementById('modalTitle').innerText = p['캠페인명'] || "제목 없음";
+            document.getElementById('modalTitle').innerText = getCampaignTitle(p);
             let bodyHtml = `<div><b>기간:</b> ${p._calStart} ~ ${p._calEnd}</div>`;
             
             Object.keys(p).forEach(key => {
