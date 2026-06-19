@@ -496,7 +496,7 @@
             var calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth', 
-                initialDate: '2026-05-01', 
+                initialDate: new Date(), 
                 locale: 'ko',
                 events: data, 
                 dayMaxEvents: 6, 
