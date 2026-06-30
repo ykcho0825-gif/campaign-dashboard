@@ -227,7 +227,7 @@
         .event-end .fc-event-title { color: #475569 !important; }
 
         /* 간트차트 뷰 레이아웃 */
-        #ganttContainer { display: none; margin-top: 10px; animation: fadeIn 0.3s ease; }
+        #ganttContainer { display: none !important; margin-top: 10px; animation: fadeIn 0.3s ease; }
         .gantt-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5em; }
         #ganttMonthTitle { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
         .gantt-toolbar-right { display: flex; gap: 8px; align-items: center; }
@@ -310,9 +310,9 @@
 
     <div class="header-container">
         <div class="top-row">
-            <div class="title-section"><h2>B tv Campaign Dashboard</h2><p>월별 채널 발송 흐름, CAPA, 캠페인 일정을 한 번에 확인합니다.</p><div class="hero-chip-row"><span class="hero-chip">Monthly Channel Trend</span><span class="hero-chip">Campaign Calendar</span><span class="hero-chip">CAPA Check</span></div></div>
+            <div class="title-section"><h2>B tv Campaign Dashboard</h2><p>월별 채널 발송 흐름과 캠페인 일정을 한 번에 확인합니다.</p></div>
             <div class="action-section">
-                <button id="viewToggleBtn" class="toggle-btn" onclick="toggleViewMode()">목록 보기</button>
+                <button id="calendarJumpBtn" class="toggle-btn" onclick="scrollToCalendar()">캘린더 보기</button>
             </div>
         </div>
 
@@ -337,7 +337,7 @@
             <div class="overview-card capa-assistant-card">
                 <div class="overview-card-header">
                     <div>
-                        <h3 class="overview-title">CAPA Assistant</h3>
+                        <h3 class="overview-title">📨 캠페인 발송 모수 확인</h3>
                         <div class="overview-subtitle">배너/쿠폰 발송 가능 여부를 빠르게 확인합니다.</div>
                     </div>
                     <span class="overview-badge">±2일 추천</span>
@@ -389,7 +389,7 @@
         </div>
     </div>
 
-    <div class="section-heading"><div><span>Calendar</span><h3>캠페인 캘린더</h3></div><p>날짜 칸에 마우스를 올리면 일별 발송 요약을 확인할 수 있습니다.</p></div>
+    <div class="section-heading"><div><h3>📅 캠페인 캘린더</h3></div><p>날짜 칸에 마우스를 올리면 일별 발송 요약을 확인할 수 있습니다.</p></div>
     <div id='calendar'></div>
 
     <div id="ganttContainer">
@@ -616,28 +616,17 @@
             }).join('');
         }
 
-        function toggleViewMode() {
+        function scrollToCalendar() {
+            currentViewMode = 'calendar';
             const calEl = document.getElementById('calendar');
             const ganttEl = document.getElementById('ganttContainer');
-            const btn = document.getElementById('viewToggleBtn');
             const tooltip = document.getElementById('dateHoverTooltip');
-            
-            if(tooltip) tooltip.style.display = 'none';
-
-            if (currentViewMode === 'calendar') {
-                currentViewMode = 'gantt';
-                calEl.style.display = 'none';
-                ganttEl.style.display = 'block';
-                btn.innerText = '캘린더 보기';
-                updateGanttTitle(); 
-                applyFilters(); 
-            } else {
-                currentViewMode = 'calendar';
-                ganttEl.style.display = 'none';
+            if (tooltip) tooltip.style.display = 'none';
+            if (ganttEl) ganttEl.style.display = 'none';
+            if (calEl) {
                 calEl.style.display = 'block';
-                btn.innerText = '목록 보기'; 
-                if(calendar) calendar.render(); 
-                applyFilters();
+                calEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (calendar) setTimeout(() => calendar.render(), 250);
             }
         }
 
