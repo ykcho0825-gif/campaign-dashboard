@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset='utf-8' />
-    <title>B tv Campaign Dashboard V8.0 (Navy Executive Dashboard)</title>
+    <title>B tv Campaign Dashboard V9.0 (Mixed Trend & CAPA Assistant)</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
@@ -76,18 +76,18 @@
 
         /* 월별 발송 그래프 요약 */
         .monthly-overview {
-            display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px; margin-bottom: 18px;
+            display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(330px, 0.85fr); gap: 14px; margin-bottom: 14px;
         }
         .overview-card {
             background: rgba(255, 255, 255, 0.96); border: 1px solid rgba(226, 232, 240, 0.95);
-            border-radius: 22px; padding: 20px 22px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+            border-radius: 20px; padding: 16px 18px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
             backdrop-filter: blur(10px);
         }
-        .overview-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+        .overview-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
         .overview-title { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em; }
         .overview-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
         .overview-badge { font-size: 11px; font-weight: 800; color: #0f4c81; background: #e0f2fe; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
-        .chart-wrap { position: relative; height: 230px; }
+        .chart-wrap { position: relative; height: 190px; }
         .channel-kpi-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .channel-kpi-card { background: linear-gradient(180deg,#ffffff 0%,#f8fafc 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
         .channel-kpi-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
@@ -96,27 +96,51 @@
         .legend-dot { width: 9px; height: 9px; border-radius: 999px; display: inline-block; }
         .legend-dot.tv { background: #0f4c81; }
         .legend-dot.toast { background: #64748b; }
+        .legend-dot.target { background: #22c55e; }
+        .capa-assistant-card { display: flex; flex-direction: column; gap: 12px; }
+        .capa-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .capa-field { display: flex; flex-direction: column; gap: 6px; }
+        .capa-field.full { grid-column: 1 / -1; }
+        .capa-field label { font-size: 11px; font-weight: 800; color: var(--text-muted); }
+        .capa-input { width: 100%; box-sizing: border-box; padding: 10px 11px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 13px; color: var(--text-main); outline: none; background: #fff; }
+        .capa-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.10); }
+        .capa-check-row { display:flex; gap:8px; flex-wrap:wrap; }
+        .capa-check { flex:1; min-width:120px; display:flex; align-items:center; gap:8px; padding:10px 11px; border-radius:12px; border:1px solid var(--border-color); background:#f8fafc; font-size:12px; font-weight:800; color:var(--navy-800); cursor:pointer; }
+        .capa-check input { accent-color: var(--accent-blue); }
+        .capa-btn { width:100%; border:0; border-radius:14px; padding:11px 14px; background:linear-gradient(135deg, var(--navy-800), var(--navy-700)); color:#fff; font-size:13px; font-weight:900; cursor:pointer; box-shadow:0 12px 24px rgba(15, 42, 74, 0.18); }
+        .capa-btn:hover { filter: brightness(1.05); }
+        .capa-result-list { display:flex; flex-direction:column; gap:8px; }
+        .capa-result { border:1px solid var(--border-color); background:#ffffff; border-radius:14px; padding:10px 12px; }
+        .capa-result-top { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:5px; }
+        .capa-result-title { font-size:12px; font-weight:900; color:var(--text-main); }
+        .capa-status { font-size:11px; font-weight:900; padding:4px 8px; border-radius:999px; }
+        .capa-status.ok { color:#065f46; background:#d1fae5; }
+        .capa-status.no { color:#991b1b; background:#fee2e2; }
+        .capa-result-desc { font-size:11.5px; color:var(--text-muted); line-height:1.45; }
+        .capa-reco { margin-top:6px; font-size:11.5px; color:var(--accent-blue); font-weight:800; }
+        .capa-helper-text { font-size:11px; color:var(--text-muted); line-height:1.45; }
+
         @media (max-width: 900px) { .monthly-overview { grid-template-columns: 1fr; } .top-row { flex-direction: column; align-items: stretch; gap: 14px; } .action-section { justify-content: space-between; } }
 
         /* 요약 바 현황판 */
         .summary-bar {
-            display: grid; grid-template-columns: 1fr 2.2fr; gap: 14px; margin-bottom: 22px; font-size: 13px;
+            display: grid; grid-template-columns: 1fr 2.2fr; gap: 12px; margin-bottom: 16px; font-size: 12px;
         }
-        .summary-group { display: flex; gap: 16px; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 16px 18px; border-radius: 18px; box-shadow: 0 12px 26px rgba(15,23,42,0.07); flex-wrap: wrap; }
+        .summary-group { display: flex; gap: 16px; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 16px; box-shadow: 0 12px 26px rgba(15,23,42,0.07); flex-wrap: wrap; }
         .summary-group:not(:last-child) { border-right: 1px solid var(--border-color); padding-right: 18px; }
-        .summary-item { color: #334155; padding: 8px 10px; background:#f8fafc; border-radius:12px; }
-        .summary-item b { color: var(--navy-800); font-size: 18px; font-weight: 850; letter-spacing:-0.03em; }
+        .summary-item { color: #334155; padding: 6px 9px; background:#f8fafc; border-radius:10px; }
+        .summary-item b { color: var(--navy-800); font-size: 15px; font-weight: 850; letter-spacing:-0.03em; }
         .summary-label { font-weight: 850; color: var(--navy-700); margin-right: 2px; }
         @media (max-width: 900px) { .summary-bar { grid-template-columns: 1fr; } }
 
         /* 컨트롤 패널 필터 */
-        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
         .filter-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
         .filter-wrapper { display: flex; flex-direction: column; gap: 4px; }
-        .filter-section { display: flex; gap: 10px; align-items: center; }
+        .filter-section { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         
         .filter-chip {
-            padding: 8px 16px; background: var(--bg-card); border-radius: 8px; color: var(--text-muted);
+            padding: 7px 13px; background: var(--bg-card); border-radius: 8px; color: var(--text-muted);
             font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border-color); user-select: none; transition: all 0.2s ease;
             box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
@@ -157,19 +181,19 @@
             border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
         .fc { color: var(--text-main) !important; }
-        .fc th { border-color: var(--border-color) !important; background-color: #f8fafc; color: var(--text-muted); }
+        .fc th { border-color: #dbe4f0 !important; background-color: #eef4ff; color: var(--navy-800); }
         .fc td { border-color: var(--border-color) !important; }
         .fc-theme-standard .fc-scrollgrid { border-color: var(--border-color) !important; border-radius: 8px; overflow: hidden; }
         
-        .fc .fc-toolbar-title { font-size: 18px !important; font-weight: 700 !important; color: var(--text-main) !important; }
+        .fc .fc-toolbar-title { font-size: 18px !important; font-weight: 850 !important; color: var(--navy-800) !important; letter-spacing:-0.03em; }
         .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 600 !important; color: #475569 !important; padding: 8px !important; }
         .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13px !important; font-weight: 600 !important; padding: 10px 0 !important; color: #475569; }
         
         .fc-day-sat .fc-daygrid-day-number { color: #0284c7 !important; }
         .fc-day-sun .fc-daygrid-day-number { color: #ea580c !important; }
 
-        .fc .fc-button-primary { background-color: var(--bg-card) !important; border-color: var(--border-color) !important; color: var(--text-main) !important; font-weight: 600 !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important; }
-        .fc .fc-button-primary:hover { background-color: var(--bg-card-inner) !important; border-color: #cbd5e1 !important; }
+        .fc .fc-button-primary { background-color: var(--navy-800) !important; border-color: var(--navy-800) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important; }
+        .fc .fc-button-primary:hover { background-color: var(--navy-700) !important; border-color: var(--navy-700) !important; }
         .fc .fc-button-primary:disabled { background-color: #f1f5f9 !important; border-color: #e2e8f0 !important; opacity: 0.6; color: #94a3b8 !important; }
         .fc .fc-button-active { background-color: #e0f2fe !important; border-color: var(--accent-blue) !important; color: var(--accent-blue) !important; }
         .fc-daygrid-more-link { font-size: 11px !important; font-weight: 600 !important; color: var(--accent-blue) !important; }
@@ -179,8 +203,8 @@
         .fc-event:hover { opacity: 0.85; }
         .fc-event-title { font-weight: 600 !important; font-size: 11px; }
         
-        .event-start { background-color: #f3ebf7 !important; border-left: 3px solid var(--start-color) !important; }
-        .event-start .fc-event-title { color: #6b21a8 !important; }
+        .event-start { background-color: #eaf2ff !important; border-left: 3px solid var(--navy-700) !important; }
+        .event-start .fc-event-title { color: var(--navy-800) !important; }
         
         .event-end { background-color: #f1f5f9 !important; border-left: 3px solid var(--end-color) !important; }
         .event-end .fc-event-title { color: #475569 !important; }
@@ -281,31 +305,40 @@
                 <div class="overview-card-header">
                     <div>
                         <h3 class="overview-title">월별 발송 건수 추이</h3>
-                        <div class="overview-subtitle">시작일 기준 TV팝업 / 토스트팝업 캠페인 건수</div>
+                        <div class="overview-subtitle">시작일 기준 TV팝업·토스트팝업 발송 건수와 전체 타겟 수</div>
                     </div>
                     <span class="overview-badge" id="monthlyChartBadge">전체 기간</span>
                 </div>
                 <div class="chart-wrap"><canvas id="monthlyChannelChart"></canvas></div>
             </div>
-            <div class="overview-card">
+            <div class="overview-card capa-assistant-card">
                 <div class="overview-card-header">
                     <div>
-                        <h3 class="overview-title">이번 달 채널 요약</h3>
-                        <div class="overview-subtitle" id="currentMonthLabel">현재 월 기준</div>
+                        <h3 class="overview-title">CAPA Assistant</h3>
+                        <div class="overview-subtitle">배너/쿠폰 발송 가능 여부를 빠르게 확인합니다.</div>
+                    </div>
+                    <span class="overview-badge">±2일 추천</span>
+                </div>
+                <div class="capa-form-grid">
+                    <div class="capa-field">
+                        <label for="capaDate">기준일</label>
+                        <input type="date" id="capaDate" class="capa-input">
+                    </div>
+                    <div class="capa-field">
+                        <label for="capaTarget">타겟 수</label>
+                        <input type="number" id="capaTarget" class="capa-input" placeholder="예: 1200000" min="0" step="10000">
+                    </div>
+                    <div class="capa-field full">
+                        <label>발송 유형</label>
+                        <div class="capa-check-row">
+                            <label class="capa-check"><input type="checkbox" id="capaBanner" checked> 배너</label>
+                            <label class="capa-check"><input type="checkbox" id="capaCoupon" checked> 쿠폰</label>
+                        </div>
                     </div>
                 </div>
-                <div class="channel-kpi-grid">
-                    <div class="channel-kpi-card">
-                        <div class="channel-kpi-label"><span class="legend-dot tv"></span>TV팝업 발송 건수</div>
-                        <div class="channel-kpi-value" id="monthlyTvKpi">0</div>
-                        <div class="channel-kpi-desc">이번 달 시작 캠페인 기준</div>
-                    </div>
-                    <div class="channel-kpi-card">
-                        <div class="channel-kpi-label"><span class="legend-dot toast"></span>토스트팝업 발송 건수</div>
-                        <div class="channel-kpi-value" id="monthlyToastKpi">0</div>
-                        <div class="channel-kpi-desc">이번 달 시작 캠페인 기준</div>
-                    </div>
-                </div>
+                <button class="capa-btn" onclick="runCapaAssistant()">가능 여부 확인</button>
+                <div class="capa-helper-text">배너 CAPA는 일 280만, 목요일은 270만 / 쿠폰은 일 270만 기준입니다.</div>
+                <div class="capa-result-list" id="capaResultList"></div>
             </div>
         </section>
         
@@ -332,6 +365,13 @@
                     <label class="filter-chip"><input type="checkbox" class="type-filter" value="토스트팝업"> 토스트팝업</label>
                     <label class="filter-chip"><input type="checkbox" class="type-filter" value="쿠폰"> 쿠폰</label>
                     <label class="filter-chip"><input type="checkbox" class="type-filter" value="Seg채널"> Seg채널</label>
+                </div>
+            </div>
+
+            <div class="filter-wrapper">
+                <div class="filter-title">부서 필터</div>
+                <div class="filter-section" id="departmentFilterSection">
+                    <span style="font-size:12px; color:var(--text-muted);">시트 로딩 후 자동 생성</span>
                 </div>
             </div>
 
@@ -400,6 +440,8 @@
             document.querySelectorAll('.type-filter').forEach(cb => cb.addEventListener('change', applyFilters));
             document.querySelectorAll('.date-filter').forEach(cb => cb.addEventListener('change', applyFilters));
             document.getElementById('eventSearch').addEventListener('input', applyFilters);
+            setDefaultCapaDate();
+            ['capaDate','capaTarget','capaBanner','capaCoupon'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', runCapaAssistant); if (el) el.addEventListener('change', runCapaAssistant); });
         });
 
         function parseCSV(csvText) {
@@ -449,11 +491,13 @@
                 })
                 .then(csvText => {
                     rawSourceData = parseCSV(csvText);
+                    buildDepartmentFilters(rawSourceData);
                     allEvents = processEvents(rawSourceData);
                     initCalendar(allEvents);
                     document.getElementById('loadingOverlay').style.display = 'none';
                     updateSummary();
                     renderMonthlyChannelSummary();
+                    runCapaAssistant();
                 })
                 .catch(err => {
                     document.getElementById('loadingOverlay').innerText = "구글 시트 연동 오류가 발생했습니다. (링크 공개 상태 확인 필요)";
@@ -485,6 +529,119 @@
                 if (firstColumnValue && String(firstColumnValue).trim()) return String(firstColumnValue).trim();
             }
             return "제목 없음";
+        }
+
+
+        function getDepartmentValue(item) {
+            if (!item) return "";
+            const direct = item['부서'] || item['담당부서'] || item['팀'] || item['부서명'] || item['조직'];
+            if (direct && String(direct).trim()) return String(direct).trim();
+            const keys = Object.keys(item).filter(k => !k.startsWith('_'));
+            const hKey = keys[7];
+            return hKey && item[hKey] ? String(item[hKey]).trim() : "";
+        }
+
+        function buildDepartmentFilters(data) {
+            const wrap = document.getElementById('departmentFilterSection');
+            if (!wrap) return;
+            const departments = Array.from(new Set(data.map(getDepartmentValue).filter(Boolean))).sort((a,b) => a.localeCompare(b, 'ko'));
+            if (departments.length === 0) {
+                wrap.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">부서 데이터 없음</span>';
+                return;
+            }
+            wrap.innerHTML = departments.map(dept => `<label class="filter-chip"><input type="checkbox" class="dept-filter" value="${escapeHtml(dept)}"> ${escapeHtml(dept)}</label>`).join('');
+            document.querySelectorAll('.dept-filter').forEach(cb => cb.addEventListener('change', applyFilters));
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+        }
+
+        function setDefaultCapaDate() {
+            const input = document.getElementById('capaDate');
+            if (!input) return;
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            input.value = new Date(now.getTime() - offset).toISOString().split('T')[0];
+        }
+
+        function getDateOffset(dateStr, offsetDays) {
+            const d = new Date(`${dateStr}T00:00:00`);
+            d.setDate(d.getDate() + offsetDays);
+            const tzOffset = d.getTimezoneOffset() * 60000;
+            return new Date(d.getTime() - tzOffset).toISOString().split('T')[0];
+        }
+
+        function getDayLabel(dateStr) {
+            const d = new Date(`${dateStr}T00:00:00`);
+            const days = ['일','월','화','수','목','금','토'];
+            return `${dateStr.slice(5).replace('-', '/')}(${days[d.getDay()]})`;
+        }
+
+        function getDailyCapa(type, dateStr) {
+            const d = new Date(`${dateStr}T00:00:00`);
+            if (type === 'banner') return d.getDay() === 4 ? 2700000 : 2800000;
+            if (type === 'coupon') return 2700000;
+            return 0;
+        }
+
+        function getDailyUsed(type, dateStr) {
+            return rawSourceData.reduce((sum, item) => {
+                const start = cleanDateStr(item['시작일']);
+                if (start !== dateStr) return sum;
+                const filterText = (item['필터'] || '').toUpperCase();
+                const targetValue = getTargetValue(item);
+                if (type === 'banner' && (filterText.includes('SEG') || filterText.includes('배너'))) return sum + targetValue;
+                if (type === 'coupon' && filterText.includes('쿠폰')) return sum + targetValue;
+                return sum;
+            }, 0);
+        }
+
+        function getCapaRecommendations(type, targetValue, baseDate) {
+            const list = [];
+            for (let i = -2; i <= 2; i++) {
+                if (i === 0) continue;
+                const dateStr = getDateOffset(baseDate, i);
+                const capa = getDailyCapa(type, dateStr);
+                const used = getDailyUsed(type, dateStr);
+                const remain = Math.max(capa - used, 0);
+                if (remain >= targetValue) list.push(`${getDayLabel(dateStr)} 잔여 ${formatTargetNumber(remain)}`);
+            }
+            return list;
+        }
+
+        function runCapaAssistant() {
+            const resultWrap = document.getElementById('capaResultList');
+            if (!resultWrap) return;
+            const baseDate = document.getElementById('capaDate')?.value;
+            const targetValue = Number(document.getElementById('capaTarget')?.value || 0);
+            const checks = [
+                { type: 'banner', label: '배너', checked: document.getElementById('capaBanner')?.checked },
+                { type: 'coupon', label: '쿠폰', checked: document.getElementById('capaCoupon')?.checked }
+            ].filter(v => v.checked);
+
+            if (!baseDate || !targetValue || checks.length === 0) {
+                resultWrap.innerHTML = '<div class="capa-result"><div class="capa-result-desc">기준일, 타겟 수, 발송 유형을 입력하면 결과가 표시됩니다.</div></div>';
+                return;
+            }
+
+            resultWrap.innerHTML = checks.map(item => {
+                const capa = getDailyCapa(item.type, baseDate);
+                const used = getDailyUsed(item.type, baseDate);
+                const remain = Math.max(capa - used, 0);
+                const ok = remain >= targetValue;
+                const recommendations = ok ? [] : getCapaRecommendations(item.type, targetValue, baseDate);
+                const recoHtml = ok ? '' : `<div class="capa-reco">추천: ${recommendations.length ? recommendations.join(' · ') : '전후 2일 내 가능 일자 없음'}</div>`;
+                return `
+                    <div class="capa-result">
+                        <div class="capa-result-top">
+                            <div class="capa-result-title">${item.label}</div>
+                            <span class="capa-status ${ok ? 'ok' : 'no'}">${ok ? '가능' : '불가'}</span>
+                        </div>
+                        <div class="capa-result-desc">CAPA ${formatTargetNumber(capa)} · 기존 ${formatTargetNumber(used)} · 잔여 ${formatTargetNumber(remain)} · 요청 ${formatTargetNumber(targetValue)}</div>
+                        ${recoHtml}
+                    </div>`;
+            }).join('');
         }
 
         function toggleViewMode() {
@@ -730,12 +887,14 @@
         function applyFilters() {
             const activeFilters = Array.from(document.querySelectorAll('.type-filter:checked')).map(el => el.value);
             const activeDateFilters = Array.from(document.querySelectorAll('.date-filter:checked')).map(el => el.value);
+            const activeDeptFilters = Array.from(document.querySelectorAll('.dept-filter:checked')).map(el => el.value);
             const searchText = document.getElementById('eventSearch').value.toUpperCase();
             
             currentFilteredEvents = allEvents.filter(event => {
                 const p = event.extendedProps;
                 const title = (event.title || "").toUpperCase();
                 const filterText = (p['필터'] || "").toUpperCase(); 
+                const deptText = getDepartmentValue(p);
                 
                 const matchesSearch = title.includes(searchText);
                 const matchesDateType = activeDateFilters.includes(p.type);
@@ -749,19 +908,20 @@
                     const hasSeg = activeFilters.includes("Seg채널") && (filterText.includes("SEG") || filterText.includes("배너"));
                     matchesType = hasTV || hasToast || hasCoupon || hasSeg;
                 }
-                return matchesSearch && matchesDateType && matchesType;
+                const matchesDept = activeDeptFilters.length === 0 || activeDeptFilters.includes(deptText);
+                return matchesSearch && matchesDateType && matchesType && matchesDept;
             });
 
             if(calendar) {
                 calendar.removeAllEvents();
                 calendar.addEventSource(currentFilteredEvents);
             }
-            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText); }
+            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText, activeDeptFilters); }
             updateSummary(currentFilteredEvents);
             renderMonthlyChannelSummary(currentFilteredEvents);
         }
 
-        function renderGanttChart(activeFilters, searchText) {
+        function renderGanttChart(activeFilters, searchText, activeDeptFilters = []) {
             const headerTimeline = document.getElementById('ganttHeaderTimeline');
             const rowsContainer = document.getElementById('ganttRowsContainer');
             
@@ -802,7 +962,9 @@
             itemsToRender.forEach(item => {
                 const title = getCampaignTitle(item);
                 const filterText = (item['필터'] || "").toUpperCase();
+                const deptText = getDepartmentValue(item);
                 
+                if (activeDeptFilters.length > 0 && !activeDeptFilters.includes(deptText)) return;
                 if (searchText && !title.toUpperCase().includes(searchText)) return;
 
                 if (activeFilters.length > 0) {
@@ -897,10 +1059,11 @@
             startEvents.forEach(e => {
                 const monthKey = getMonthKey(e.start);
                 if (!monthKey) return;
-                if (!monthMap[monthKey]) monthMap[monthKey] = { monthKey, label: getMonthLabel(monthKey), tv: 0, toast: 0 };
+                if (!monthMap[monthKey]) monthMap[monthKey] = { monthKey, label: getMonthLabel(monthKey), tv: 0, toast: 0, target: 0 };
                 const filterText = (e.extendedProps['필터'] || '').toUpperCase();
                 if (filterText.includes('TV')) monthMap[monthKey].tv += 1;
                 if (filterText.includes('토스트')) monthMap[monthKey].toast += 1;
+                monthMap[monthKey].target += getTargetValue(e.extendedProps);
             });
 
             return Object.values(monthMap).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
@@ -914,6 +1077,7 @@
             const labels = monthlyData.map(d => d.label);
             const tvData = monthlyData.map(d => d.tv);
             const toastData = monthlyData.map(d => d.toast);
+            const targetData = monthlyData.map(d => d.target);
 
             const badge = document.getElementById('monthlyChartBadge');
             if (badge) {
@@ -928,8 +1092,9 @@
                 data: {
                     labels,
                     datasets: [
-                        { label: 'TV팝업', data: tvData, backgroundColor: 'rgba(15, 59, 99, 0.92)', borderRadius: 10, maxBarThickness: 36 },
-                        { label: '토스트팝업', data: toastData, backgroundColor: 'rgba(100, 116, 139, 0.72)', borderRadius: 10, maxBarThickness: 36 }
+                        { type: 'bar', label: 'TV팝업', data: tvData, yAxisID: 'y', backgroundColor: 'rgba(15, 59, 99, 0.92)', borderRadius: 8, maxBarThickness: 30 },
+                        { type: 'bar', label: '토스트팝업', data: toastData, yAxisID: 'y', backgroundColor: 'rgba(100, 116, 139, 0.72)', borderRadius: 8, maxBarThickness: 30 },
+                        { type: 'line', label: '전체 타겟 수', data: targetData, yAxisID: 'yTarget', borderColor: 'rgba(34, 197, 94, 0.95)', backgroundColor: 'rgba(34, 197, 94, 0.12)', borderWidth: 3, pointRadius: 3, pointHoverRadius: 5, tension: 0.35 }
                     ]
                 },
                 options: {
@@ -937,11 +1102,12 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, weight: '600' } } },
-                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}건` } }
+                        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === 'yTarget' ? `${ctx.dataset.label}: ${formatTargetNumber(ctx.parsed.y)}` : `${ctx.dataset.label}: ${ctx.parsed.y}건` } }
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } },
-                        y: { beginAtZero: true, ticks: { precision: 0, callback: value => `${value}건`, font: { size: 11 } }, grid: { color: 'rgba(148, 163, 184, 0.18)' } }
+                        y: { beginAtZero: true, position: 'left', ticks: { precision: 0, callback: value => `${value}건`, font: { size: 11 } }, grid: { color: 'rgba(148, 163, 184, 0.18)' } },
+                        yTarget: { beginAtZero: true, position: 'right', ticks: { callback: value => formatTargetNumber(value), font: { size: 11 } }, grid: { drawOnChartArea: false } }
                     }
                 }
             });
@@ -963,8 +1129,10 @@
                 if (filterText.includes('TV')) tv += 1;
                 if (filterText.includes('토스트')) toast += 1;
             });
-            document.getElementById('monthlyTvKpi').innerText = tv.toLocaleString('ko-KR');
-            document.getElementById('monthlyToastKpi').innerText = toast.toLocaleString('ko-KR');
+            const tvEl = document.getElementById('monthlyTvKpi');
+            const toastEl = document.getElementById('monthlyToastKpi');
+            if (tvEl) tvEl.innerText = tv.toLocaleString('ko-KR');
+            if (toastEl) toastEl.innerText = toast.toLocaleString('ko-KR');
         }
 
         function updateSummary(currentEvents) {
