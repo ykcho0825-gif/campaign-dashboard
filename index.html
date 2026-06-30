@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset='utf-8' />
-    <title>B tv Campaign Dashboard V9.0 (Mixed Trend & CAPA Assistant)</title>
+    <title>B tv Campaign Dashboard V9.1 (Calendar Fixed)</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
@@ -368,13 +368,6 @@
                 </div>
             </div>
 
-            <div class="filter-wrapper">
-                <div class="filter-title">부서 필터</div>
-                <div class="filter-section" id="departmentFilterSection">
-                    <span style="font-size:12px; color:var(--text-muted);">시트 로딩 후 자동 생성</span>
-                </div>
-            </div>
-
             <div class="filter-wrapper" style="align-items: flex-end;">
                 <div class="filter-title" style="align-self: flex-end;">일정 종류 필터</div>
                 <div class="filter-section" style="gap: 12px;">
@@ -491,7 +484,6 @@
                 })
                 .then(csvText => {
                     rawSourceData = parseCSV(csvText);
-                    buildDepartmentFilters(rawSourceData);
                     allEvents = processEvents(rawSourceData);
                     initCalendar(allEvents);
                     document.getElementById('loadingOverlay').style.display = 'none';
@@ -531,31 +523,6 @@
             return "제목 없음";
         }
 
-
-        function getDepartmentValue(item) {
-            if (!item) return "";
-            const direct = item['부서'] || item['담당부서'] || item['팀'] || item['부서명'] || item['조직'];
-            if (direct && String(direct).trim()) return String(direct).trim();
-            const keys = Object.keys(item).filter(k => !k.startsWith('_'));
-            const hKey = keys[7];
-            return hKey && item[hKey] ? String(item[hKey]).trim() : "";
-        }
-
-        function buildDepartmentFilters(data) {
-            const wrap = document.getElementById('departmentFilterSection');
-            if (!wrap) return;
-            const departments = Array.from(new Set(data.map(getDepartmentValue).filter(Boolean))).sort((a,b) => a.localeCompare(b, 'ko'));
-            if (departments.length === 0) {
-                wrap.innerHTML = '<span style="font-size:12px; color:var(--text-muted);">부서 데이터 없음</span>';
-                return;
-            }
-            wrap.innerHTML = departments.map(dept => `<label class="filter-chip"><input type="checkbox" class="dept-filter" value="${escapeHtml(dept)}"> ${escapeHtml(dept)}</label>`).join('');
-            document.querySelectorAll('.dept-filter').forEach(cb => cb.addEventListener('change', applyFilters));
-        }
-
-        function escapeHtml(value) {
-            return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-        }
 
         function setDefaultCapaDate() {
             const input = document.getElementById('capaDate');
@@ -683,8 +650,16 @@
         function cleanDateStr(dateVal) {
             if (!dateVal) return "";
             let str = String(dateVal).trim();
-            if (str.includes("T")) { str = str.split("T")[0]; }
-            return str; 
+            if (str.includes("T")) str = str.split("T")[0];
+            str = str.replace(/[.\/]/g, "-");
+
+            const parts = str.split("-").map(v => v.trim()).filter(Boolean);
+            if (parts.length === 3) {
+                let [y, m, d] = parts;
+                if (y.length === 2) y = "20" + y;
+                return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+            }
+            return str;
         }
 
         function formatTargetNumber(num) {
@@ -724,11 +699,26 @@
             return processed;
         }
 
+
+        function getInitialCalendarDate(events) {
+            const today = new Date();
+            const todayMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            const startEvents = events.filter(e => e.extendedProps && e.extendedProps.type === 'start');
+            const hasThisMonth = startEvents.some(e => getMonthKey(e.start) === todayMonthKey);
+            if (hasThisMonth || startEvents.length === 0) return today;
+
+            const sorted = startEvents
+                .map(e => e.start)
+                .filter(Boolean)
+                .sort();
+            return sorted.length ? new Date(`${sorted[sorted.length - 1]}T00:00:00`) : today;
+        }
+
         function initCalendar(data) {
             var calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth', 
-                initialDate: new Date(), 
+                initialDate: getInitialCalendarDate(data), 
                 locale: 'ko',
                 events: data, 
                 dayMaxEvents: 6, 
@@ -887,15 +877,12 @@
         function applyFilters() {
             const activeFilters = Array.from(document.querySelectorAll('.type-filter:checked')).map(el => el.value);
             const activeDateFilters = Array.from(document.querySelectorAll('.date-filter:checked')).map(el => el.value);
-            const activeDeptFilters = Array.from(document.querySelectorAll('.dept-filter:checked')).map(el => el.value);
             const searchText = document.getElementById('eventSearch').value.toUpperCase();
             
             currentFilteredEvents = allEvents.filter(event => {
                 const p = event.extendedProps;
                 const title = (event.title || "").toUpperCase();
                 const filterText = (p['필터'] || "").toUpperCase(); 
-                const deptText = getDepartmentValue(p);
-                
                 const matchesSearch = title.includes(searchText);
                 const matchesDateType = activeDateFilters.includes(p.type);
                 
@@ -908,20 +895,19 @@
                     const hasSeg = activeFilters.includes("Seg채널") && (filterText.includes("SEG") || filterText.includes("배너"));
                     matchesType = hasTV || hasToast || hasCoupon || hasSeg;
                 }
-                const matchesDept = activeDeptFilters.length === 0 || activeDeptFilters.includes(deptText);
-                return matchesSearch && matchesDateType && matchesType && matchesDept;
+                return matchesSearch && matchesDateType && matchesType;
             });
 
             if(calendar) {
                 calendar.removeAllEvents();
                 calendar.addEventSource(currentFilteredEvents);
             }
-            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText, activeDeptFilters); }
+            if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText); }
             updateSummary(currentFilteredEvents);
             renderMonthlyChannelSummary(currentFilteredEvents);
         }
 
-        function renderGanttChart(activeFilters, searchText, activeDeptFilters = []) {
+        function renderGanttChart(activeFilters, searchText) {
             const headerTimeline = document.getElementById('ganttHeaderTimeline');
             const rowsContainer = document.getElementById('ganttRowsContainer');
             
@@ -962,9 +948,6 @@
             itemsToRender.forEach(item => {
                 const title = getCampaignTitle(item);
                 const filterText = (item['필터'] || "").toUpperCase();
-                const deptText = getDepartmentValue(item);
-                
-                if (activeDeptFilters.length > 0 && !activeDeptFilters.includes(deptText)) return;
                 if (searchText && !title.toUpperCase().includes(searchText)) return;
 
                 if (activeFilters.length > 0) {
