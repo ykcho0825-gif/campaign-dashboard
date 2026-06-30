@@ -170,6 +170,23 @@
         .filter-dot.start { background-color: var(--start-color); }
         .filter-dot.end { background-color: var(--end-color); }
 
+
+        .calendar-control-panel {
+            background: rgba(255,255,255,0.94); border: 1px solid var(--border-color);
+            border-radius: 18px; padding: 14px 16px; box-shadow: 0 12px 26px rgba(15,23,42,0.06);
+        }
+        .calendar-right-filter { align-items: flex-end; gap: 10px; min-width: 320px; }
+        .calendar-search-row { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; width: 100%; }
+        .calendar-search-input {
+            width: 280px; background: #ffffff; border-color: var(--border-color);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+        .date-filter-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        @media (max-width: 900px) {
+            .calendar-right-filter, .calendar-search-row, .date-filter-box { align-items: flex-start; width: 100%; }
+            .calendar-search-input { width: 100%; }
+        }
+
         .section-heading { max-width:1280px; margin: 4px auto 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; }
         .section-heading span { display:block; font-size:11px; font-weight:850; color:var(--accent-blue); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:4px; }
         .section-heading h3 { margin:0; font-size:18px; font-weight:850; color:var(--text-main); letter-spacing:-0.03em; }
@@ -295,7 +312,6 @@
         <div class="top-row">
             <div class="title-section"><h2>B tv Campaign Dashboard</h2><p>월별 채널 발송 흐름, CAPA, 캠페인 일정을 한 번에 확인합니다.</p><div class="hero-chip-row"><span class="hero-chip">Monthly Channel Trend</span><span class="hero-chip">Campaign Calendar</span><span class="hero-chip">CAPA Check</span></div></div>
             <div class="action-section">
-                <input type="text" id="eventSearch" class="search-input" placeholder="캠페인명 검색...">
                 <button id="viewToggleBtn" class="toggle-btn" onclick="toggleViewMode()">목록 보기</button>
             </div>
         </div>
@@ -357,7 +373,7 @@
             </div>
         </div>
         
-        <div class="control-panel">
+        <div class="control-panel calendar-control-panel">
             <div class="filter-wrapper">
                 <div class="filter-title">채널 필터</div>
                 <div class="filter-section">
@@ -368,17 +384,23 @@
                 </div>
             </div>
 
-            <div class="filter-wrapper" style="align-items: flex-end;">
-                <div class="filter-title" style="align-self: flex-end;">일정 종류 필터</div>
-                <div class="filter-section" style="gap: 12px;">
-                    <label class="checkbox-label">
-                        <input type="checkbox" class="date-filter" value="start" checked>
-                        <span class="filter-dot start"></span>시작일(보라)
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" class="date-filter" value="end" checked>
-                        <span class="filter-dot end"></span>종료일(회색)
-                    </label>
+            <div class="filter-wrapper calendar-right-filter">
+                <div class="calendar-search-row">
+                    <div class="filter-title">캠페인 검색</div>
+                    <input type="text" id="eventSearch" class="search-input calendar-search-input" placeholder="캠페인명 검색...">
+                </div>
+                <div class="date-filter-box">
+                    <div class="filter-title" style="align-self: flex-end;">일정 종류 필터</div>
+                    <div class="filter-section" style="gap: 12px; justify-content:flex-end;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="date-filter" value="start" checked>
+                            <span class="filter-dot start"></span>시작일 (남색)
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="date-filter" value="end">
+                            <span class="filter-dot end"></span>종료일(회색)
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -904,7 +926,6 @@
             }
             if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText); }
             updateSummary(currentFilteredEvents);
-            renderMonthlyChannelSummary(currentFilteredEvents);
         }
 
         function renderGanttChart(activeFilters, searchText) {
@@ -1042,11 +1063,12 @@
             startEvents.forEach(e => {
                 const monthKey = getMonthKey(e.start);
                 if (!monthKey) return;
-                if (!monthMap[monthKey]) monthMap[monthKey] = { monthKey, label: getMonthLabel(monthKey), tv: 0, toast: 0, target: 0 };
+                if (!monthMap[monthKey]) monthMap[monthKey] = { monthKey, label: getMonthLabel(monthKey), tv: 0, toast: 0, target: 0, tvTarget: 0, toastTarget: 0 };
                 const filterText = (e.extendedProps['필터'] || '').toUpperCase();
-                if (filterText.includes('TV')) monthMap[monthKey].tv += 1;
-                if (filterText.includes('토스트')) monthMap[monthKey].toast += 1;
-                monthMap[monthKey].target += getTargetValue(e.extendedProps);
+                const targetValue = getTargetValue(e.extendedProps);
+                if (filterText.includes('TV')) { monthMap[monthKey].tv += 1; monthMap[monthKey].tvTarget += targetValue; }
+                if (filterText.includes('토스트')) { monthMap[monthKey].toast += 1; monthMap[monthKey].toastTarget += targetValue; }
+                monthMap[monthKey].target += targetValue;
             });
 
             return Object.values(monthMap).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
@@ -1085,7 +1107,18 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, weight: '600' } } },
-                        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === 'yTarget' ? `${ctx.dataset.label}: ${formatTargetNumber(ctx.parsed.y)}` : `${ctx.dataset.label}: ${ctx.parsed.y}건` } }
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const row = monthlyData[ctx.dataIndex] || {};
+                                    if (ctx.dataset.yAxisID === 'yTarget') {
+                                        return `${ctx.dataset.label}: ${formatTargetNumber(ctx.parsed.y)}`;
+                                    }
+                                    const target = ctx.dataset.label === 'TV팝업' ? row.tvTarget : row.toastTarget;
+                                    return `${ctx.dataset.label}: ${ctx.parsed.y}건 / 타겟 ${formatTargetNumber(target)}`;
+                                }
+                            }
+                        }
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } },
@@ -1100,7 +1133,7 @@
 
         function updateMonthlyKpi(eventsForChart) {
             if (!calendar) return;
-            const sourceEvents = (eventsForChart && eventsForChart.length) ? eventsForChart : currentFilteredEvents;
+            const sourceEvents = (eventsForChart && eventsForChart.length) ? eventsForChart : allEvents;
             const currentDate = calendar.getDate();
             const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
             const monthLabel = document.getElementById('currentMonthLabel');
