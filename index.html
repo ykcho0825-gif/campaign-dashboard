@@ -92,6 +92,7 @@
         .monthly-channel-item { background:#f8fafc; border:1px solid var(--border-color); border-radius:12px; padding:9px 10px; min-width:0; }
         .monthly-channel-label { font-size:11px; font-weight:800; color:var(--text-muted); display:flex; align-items:center; gap:6px; white-space:nowrap; }
         .monthly-channel-value { margin-top:5px; font-size:15px; font-weight:900; color:var(--navy-800); letter-spacing:-0.03em; white-space:nowrap; }
+        .monthly-summary-title { margin-top: 12px; font-size: 12px; font-weight: 900; color: var(--navy-800); letter-spacing: -0.02em; }
         .monthly-channel-value span { color:var(--text-muted); font-size:11px; font-weight:800; margin-left:3px; }
         @media (max-width: 900px) { .monthly-channel-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         .channel-kpi-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -199,6 +200,10 @@
         
         .fc .fc-toolbar-title { font-size: 18px !important; font-weight: 850 !important; color: var(--navy-800) !important; letter-spacing:-0.03em; }
         .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 600 !important; color: #475569 !important; padding: 8px !important; }
+        .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 26px; }
+        .fc .fc-daygrid-day-number { margin-right: auto !important; }
+        .calendar-day-target-sum { position: absolute; top: 8px; right: 8px; color: #94a3b8; font-size: 11px; font-weight: 800; pointer-events: none; letter-spacing: -0.02em; }
+
         .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13px !important; font-weight: 600 !important; padding: 10px 0 !important; color: #475569; }
         
         .fc-day-sat .fc-daygrid-day-number { color: #0284c7 !important; }
@@ -321,11 +326,12 @@
                     <span class="overview-badge" id="monthlyChartBadge">전체 기간</span>
                 </div>
                 <div class="chart-wrap"><canvas id="monthlyChannelChart"></canvas></div>
+                <div class="monthly-summary-title">이번 달 발송 현황</div>
                 <div class="monthly-channel-summary" aria-label="이번달 채널별 요약">
-                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot tv"></span>TV팝업</div><div class="monthly-channel-value"><b id="tvCount">0</b>건 <span id="tvTarget">(0만)</span></div></div>
-                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot toast"></span>토스트팝업</div><div class="monthly-channel-value"><b id="toastCount">0</b>건 <span id="toastTarget">(0만)</span></div></div>
-                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot target"></span>쿠폰</div><div class="monthly-channel-value"><b id="couponCount">0</b>건 <span id="couponTarget">(0만)</span></div></div>
-                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot target"></span>Seg채널</div><div class="monthly-channel-value"><b id="segCount">0</b>건 <span id="segTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label">TV팝업</div><div class="monthly-channel-value"><b id="tvCount">0</b>건 <span id="tvTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label">토스트팝업</div><div class="monthly-channel-value"><b id="toastCount">0</b>건 <span id="toastTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label">쿠폰</div><div class="monthly-channel-value"><b id="couponCount">0</b>건 <span id="couponTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label">Seg채널</div><div class="monthly-channel-value"><b id="segCount">0</b>건 <span id="segTarget">(0만)</span></div></div>
                 </div>
             </div>
             <div class="overview-card capa-assistant-card">
@@ -713,13 +719,36 @@
             return sorted.length ? new Date(`${sorted[sorted.length - 1]}T00:00:00`) : today;
         }
 
+        function getInitialFilteredEvents() {
+            return allEvents.filter(event => event.extendedProps && event.extendedProps.type === 'start');
+        }
+
+        function toLocalDateStr(dateObj) {
+            const offset = dateObj.getTimezoneOffset() * 60000;
+            return new Date(dateObj.getTime() - offset).toISOString().split('T')[0];
+        }
+
+        function getCalendarDailyTargetSum(dateStr) {
+            return currentFilteredEvents
+                .filter(e => e.extendedProps && e.extendedProps.type === 'start' && e.start === dateStr)
+                .reduce((sum, e) => sum + getTargetValue(e.extendedProps), 0);
+        }
+
+        function refreshCalendarDayTargetSums() {
+            document.querySelectorAll('.calendar-day-target-sum').forEach(el => {
+                const dateStr = el.getAttribute('data-date');
+                const total = getCalendarDailyTargetSum(dateStr);
+                el.innerText = total > 0 ? `(${formatTargetNumber(total)})` : '';
+            });
+        }
+
         function initCalendar(data) {
             var calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth', 
                 initialDate: getInitialCalendarDate(data), 
                 locale: 'ko',
-                events: data, 
+                events: getInitialFilteredEvents(), 
                 dayMaxEvents: 6, 
                 height: 'auto',
                 eventOrder: 'sortOrder,title', 
@@ -732,6 +761,13 @@
                 },
                 dayCellDidMount: function(info) {
                     const cellEl = info.el;
+                    const topEl = cellEl.querySelector('.fc-daygrid-day-top');
+                    if (topEl && !topEl.querySelector('.calendar-day-target-sum')) {
+                        const sumEl = document.createElement('span');
+                        sumEl.className = 'calendar-day-target-sum';
+                        sumEl.setAttribute('data-date', toLocalDateStr(info.date));
+                        topEl.appendChild(sumEl);
+                    }
                     
                     cellEl.addEventListener('mouseenter', function(e) {
                         if (currentViewMode !== 'calendar') return;
@@ -755,10 +791,12 @@
                         updateSummary(); 
                     }
                     updateMonthlyKpi();
+                    setTimeout(refreshCalendarDayTargetSums, 0);
                 }
             });
             calendar.render();
-            currentFilteredEvents = [...allEvents]; 
+            currentFilteredEvents = getInitialFilteredEvents(); 
+            setTimeout(refreshCalendarDayTargetSums, 0);
         }
 
         /* [복구 완료] 날짜 칸을 클릭했을 때 나타나는 일일 타겟 요약 팝업창 */
@@ -900,6 +938,7 @@
             if(calendar) {
                 calendar.removeAllEvents();
                 calendar.addEventSource(currentFilteredEvents);
+                setTimeout(refreshCalendarDayTargetSums, 0);
             }
             if (currentViewMode === 'gantt') { renderGanttChart(activeFilters, searchText); }
             updateSummary(currentFilteredEvents);
