@@ -87,7 +87,13 @@
         .overview-title { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em; }
         .overview-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
         .overview-badge { font-size: 11px; font-weight: 800; color: #0f4c81; background: #e0f2fe; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
-        .chart-wrap { position: relative; height: 190px; }
+        .chart-wrap { position: relative; height: 165px; }
+        .monthly-channel-summary { margin-top: 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+        .monthly-channel-item { background:#f8fafc; border:1px solid var(--border-color); border-radius:12px; padding:9px 10px; min-width:0; }
+        .monthly-channel-label { font-size:11px; font-weight:800; color:var(--text-muted); display:flex; align-items:center; gap:6px; white-space:nowrap; }
+        .monthly-channel-value { margin-top:5px; font-size:15px; font-weight:900; color:var(--navy-800); letter-spacing:-0.03em; white-space:nowrap; }
+        .monthly-channel-value span { color:var(--text-muted); font-size:11px; font-weight:800; margin-left:3px; }
+        @media (max-width: 900px) { .monthly-channel-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         .channel-kpi-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .channel-kpi-card { background: linear-gradient(180deg,#ffffff 0%,#f8fafc 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
         .channel-kpi-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
@@ -122,39 +128,28 @@
 
         @media (max-width: 900px) { .monthly-overview { grid-template-columns: 1fr; } .top-row { flex-direction: column; align-items: stretch; gap: 14px; } .action-section { justify-content: space-between; } }
 
-        /* 요약 바 현황판 */
-        .summary-bar {
-            display: grid; grid-template-columns: 1fr 2.2fr; gap: 12px; margin-bottom: 16px; font-size: 12px;
-        }
-        .summary-group { display: flex; gap: 16px; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 16px; box-shadow: 0 12px 26px rgba(15,23,42,0.07); flex-wrap: wrap; }
-        .summary-group:not(:last-child) { border-right: 1px solid var(--border-color); padding-right: 18px; }
-        .summary-item { color: #334155; padding: 6px 9px; background:#f8fafc; border-radius:10px; }
-        .summary-item b { color: var(--navy-800); font-size: 15px; font-weight: 850; letter-spacing:-0.03em; }
-        .summary-label { font-weight: 850; color: var(--navy-700); margin-right: 2px; }
-        @media (max-width: 900px) { .summary-bar { grid-template-columns: 1fr; } }
-
         /* 컨트롤 패널 필터 */
-        .control-panel { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
-        .filter-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .filter-wrapper { display: flex; flex-direction: column; gap: 4px; }
-        .filter-section { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .control-panel { display: grid; grid-template-columns: minmax(360px, 1.45fr) minmax(220px, 0.8fr) minmax(220px, 0.8fr); align-items: end; gap: 10px; margin-bottom: 14px; }
+        .filter-title { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+        .filter-wrapper { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .filter-section { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; min-width: 0; }
         
         .filter-chip {
-            padding: 7px 13px; background: var(--bg-card); border-radius: 8px; color: var(--text-muted);
-            font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border-color); user-select: none; transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            padding: 6px 10px; background: var(--bg-card); border-radius: 8px; color: var(--text-muted);
+            font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); user-select: none; transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02); white-space: nowrap; line-height: 1.2;
         }
         .filter-chip:hover { border-color: #cbd5e1; color: var(--text-main); }
         .filter-chip input { display: none; }
         .filter-chip:has(input:checked) { background: #e0f2fe; border-color: var(--accent-blue); color: var(--accent-blue); font-weight: 700; }
 
         .checkbox-label {
-            display: inline-flex; align-items: center; gap: 8px; font-size: 12px;
-            font-weight: 500; color: var(--text-main); cursor: pointer; user-select: none; padding: 6px 4px;
+            display: inline-flex; align-items: center; gap: 6px; font-size: 11px;
+            font-weight: 700; color: var(--text-main); cursor: pointer; user-select: none; padding: 5px 2px; white-space: nowrap;
         }
         .checkbox-label input[type="checkbox"] {
             appearance: none; -webkit-appearance: none; background-color: var(--bg-card); margin: 0;
-            font: inherit; color: currentColor; width: 16px; height: 16px; border: 1.5px solid var(--border-color); 
+            font: inherit; color: currentColor; width: 14px; height: 14px; border: 1.5px solid var(--border-color); 
             border-radius: 4px; display: grid; place-content: center; cursor: pointer; transition: all 0.15s ease;
             box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
@@ -172,18 +167,18 @@
 
 
         .calendar-control-panel {
-            background: rgba(255,255,255,0.94); border: 1px solid var(--border-color);
-            border-radius: 18px; padding: 14px 16px; box-shadow: 0 12px 26px rgba(15,23,42,0.06);
+            background: rgba(255,255,255,0.96); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 10px 12px; box-shadow: 0 10px 22px rgba(15,23,42,0.05);
         }
-        .calendar-right-filter { align-items: flex-end; gap: 10px; min-width: 320px; }
-        .calendar-search-row { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; width: 100%; }
+        .calendar-search-row { min-width: 0; }
         .calendar-search-input {
-            width: 280px; background: #ffffff; border-color: var(--border-color);
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            width: 100%; min-width:0; box-sizing:border-box; padding: 7px 10px; border-radius: 9px; background: #ffffff; border-color: var(--border-color);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); font-size: 11.5px;
         }
-        .date-filter-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-        @media (max-width: 900px) {
-            .calendar-right-filter, .calendar-search-row, .date-filter-box { align-items: flex-start; width: 100%; }
+        .date-filter-box { min-width:0; }
+        @media (max-width: 1100px) {
+            .control-panel { grid-template-columns: 1fr; }
+            .filter-section { flex-wrap: wrap; }
             .calendar-search-input { width: 100%; }
         }
 
@@ -326,6 +321,12 @@
                     <span class="overview-badge" id="monthlyChartBadge">전체 기간</span>
                 </div>
                 <div class="chart-wrap"><canvas id="monthlyChannelChart"></canvas></div>
+                <div class="monthly-channel-summary" aria-label="이번달 채널별 요약">
+                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot tv"></span>TV팝업</div><div class="monthly-channel-value"><b id="tvCount">0</b>건 <span id="tvTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot toast"></span>토스트팝업</div><div class="monthly-channel-value"><b id="toastCount">0</b>건 <span id="toastTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot target"></span>쿠폰</div><div class="monthly-channel-value"><b id="couponCount">0</b>건 <span id="couponTarget">(0만)</span></div></div>
+                    <div class="monthly-channel-item"><div class="monthly-channel-label"><span class="legend-dot target"></span>Seg채널</div><div class="monthly-channel-value"><b id="segCount">0</b>건 <span id="segTarget">(0만)</span></div></div>
+                </div>
             </div>
             <div class="overview-card capa-assistant-card">
                 <div class="overview-card-header">
@@ -358,21 +359,6 @@
             </div>
         </section>
         
-        <div class="summary-bar">
-            <div class="summary-group">
-                <span class="summary-label">[요약]</span>
-                <div class="summary-item">이번 달 시작: <b id="startCount">0</b>건</div>
-                <div class="summary-item">이번 달 종료: <b id="endCount">0</b>건</div>
-            </div>
-            <div class="summary-group">
-                <span class="summary-label">[채널별]</span>
-                <div class="summary-item">TV팝업: <b id="tvCount">0</b>건 <span id="tvTarget" style="color:var(--text-muted); margin-left:2px;">(0만)</span></div>
-                <div class="summary-item">토스트팝업: <b id="toastCount">0</b>건 <span id="toastTarget" style="color:var(--text-muted); margin-left:2px;">(0만)</span></div>
-                <div class="summary-item">쿠폰: <b id="couponCount">0</b>건 <span id="couponTarget" style="color:var(--text-muted); margin-left:2px;">(0만)</span></div>
-                <div class="summary-item">Seg채널: <b id="segCount">0</b>건 <span id="segTarget" style="color:var(--text-muted); margin-left:2px;">(0만)</span></div>
-            </div>
-        </div>
-        
         <div class="control-panel calendar-control-panel">
             <div class="filter-wrapper">
                 <div class="filter-title">채널 필터</div>
@@ -383,25 +369,16 @@
                     <label class="filter-chip"><input type="checkbox" class="type-filter" value="Seg채널"> Seg채널</label>
                 </div>
             </div>
-
-            <div class="filter-wrapper calendar-right-filter">
-                <div class="calendar-search-row">
-                    <div class="filter-title">캠페인 검색</div>
-                    <input type="text" id="eventSearch" class="search-input calendar-search-input" placeholder="캠페인명 검색...">
+            <div class="filter-wrapper date-filter-box">
+                <div class="filter-title">일정 종류 필터</div>
+                <div class="filter-section">
+                    <label class="checkbox-label"><input type="checkbox" class="date-filter" value="start" checked><span class="filter-dot start"></span>시작일 (남색)</label>
+                    <label class="checkbox-label"><input type="checkbox" class="date-filter" value="end"><span class="filter-dot end"></span>종료일(회색)</label>
                 </div>
-                <div class="date-filter-box">
-                    <div class="filter-title" style="align-self: flex-end;">일정 종류 필터</div>
-                    <div class="filter-section" style="gap: 12px; justify-content:flex-end;">
-                        <label class="checkbox-label">
-                            <input type="checkbox" class="date-filter" value="start" checked>
-                            <span class="filter-dot start"></span>시작일 (남색)
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" class="date-filter" value="end">
-                            <span class="filter-dot end"></span>종료일(회색)
-                        </label>
-                    </div>
-                </div>
+            </div>
+            <div class="filter-wrapper calendar-search-row">
+                <div class="filter-title">캠페인 검색</div>
+                <input type="text" id="eventSearch" class="search-input calendar-search-input" placeholder="캠페인명 검색...">
             </div>
         </div>
     </div>
@@ -1152,18 +1129,21 @@
         }
 
         function updateSummary(currentEvents) {
-            const eventsToCount = currentEvents || allEvents;
+            // 상단 월별 추이 하단의 채널 요약은 하단 필터와 분리하여 전체 원본 데이터 기준으로 집계합니다.
+            const eventsToCount = allEvents;
             if (!calendar) return;
             
-            const currentMonth = calendar.getDate().getMonth();
+            const currentDate = calendar.getDate();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
             const thisMonthEvents = eventsToCount.filter(e => {
                 const parts = e.start.split("-");
-                if(parts.length >= 2) { return (parseInt(parts[1], 10) - 1) === currentMonth; }
+                if(parts.length >= 2) {
+                    return Number(parts[0]) === currentYear && (parseInt(parts[1], 10) - 1) === currentMonth;
+                }
                 return false;
             });
 
-            const starts = thisMonthEvents.filter(e => e.extendedProps.type === 'start').length;
-            const ends = thisMonthEvents.filter(e => e.extendedProps.type === 'end').length;
             const uniqueCampaigns = thisMonthEvents.filter(e => e.extendedProps.type === 'start');
             
             let tvCount = 0, toastCount = 0, couponCount = 0, segCount = 0;
@@ -1180,22 +1160,20 @@
                 if (filterText.includes("SEG") || filterText.includes("배너")) { segCount++; segTargetSum += targetValue; }
             });
 
-            document.getElementById('startCount').innerText = starts;
-            document.getElementById('endCount').innerText = ends;
-            document.getElementById('tvCount').innerText = tvCount;
-            document.getElementById('toastCount').innerText = toastCount;
-            document.getElementById('couponCount').innerText = couponCount;
-            document.getElementById('segCount').innerText = segCount;
-
+            const setText = (id, value) => { const el = document.getElementById(id); if (el) el.innerText = value; };
             const formatToManOnly = (num) => {
                 if (!num || isNaN(num)) return "0만";
                 return Math.round(num / 10000).toLocaleString('ko-KR') + "만";
             };
 
-            document.getElementById('tvTarget').innerText = `(${formatToManOnly(tvTargetSum)})`;
-            document.getElementById('toastTarget').innerText = `(${formatToManOnly(toastTargetSum)})`;
-            document.getElementById('couponTarget').innerText = `(${formatToManOnly(couponTargetSum)})`;
-            document.getElementById('segTarget').innerText = `(${formatToManOnly(segTargetSum)})`;
+            setText('tvCount', tvCount);
+            setText('toastCount', toastCount);
+            setText('couponCount', couponCount);
+            setText('segCount', segCount);
+            setText('tvTarget', `(${formatToManOnly(tvTargetSum)})`);
+            setText('toastTarget', `(${formatToManOnly(toastTargetSum)})`);
+            setText('couponTarget', `(${formatToManOnly(couponTargetSum)})`);
+            setText('segTarget', `(${formatToManOnly(segTargetSum)})`);
         }
 
         function showModalFromProps(p) {
