@@ -88,6 +88,10 @@
         .overview-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
         .overview-badge { font-size: 11px; font-weight: 800; color: #0f4c81; background: #e0f2fe; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
         .chart-wrap { position: relative; height: 165px; }
+        .weekly-capacity-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+        .weekly-capacity-chart-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; }
+        .weekly-capacity-chart-title { font-size: 12px; font-weight: 800; color: var(--navy-800); margin-bottom: 8px; }
+        .weekly-capacity-chart-card .chart-wrap { height: 220px; }
         .monthly-channel-summary { margin-top: 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
         .monthly-channel-item { background:#f8fafc; border:1px solid var(--border-color); border-radius:12px; padding:9px 10px; min-width:0; }
         .monthly-channel-label { font-size:11px; font-weight:800; color:var(--text-muted); display:flex; align-items:center; gap:6px; white-space:nowrap; }
@@ -100,6 +104,7 @@
         .weekly-capa-item.warning { background: #fff1f2; border-color: #fecdd3; }
         .weekly-capa-day { font-weight: 700; margin-bottom: 6px; color: #475569; }
         .weekly-capa-value { font-size: 13px; font-weight: 800; }
+        .weekly-capa-value.small { font-size: 11px; margin-top: 4px; color: var(--text-muted); }
         .weekly-capa-item.warning .weekly-capa-value { color: #b91c1c; }
         .calendar-day-congestion-badge { display: inline-flex; align-items: center; justify-content: center; position: absolute; top: 6px; right: 6px; padding: 2px 7px; font-size: 10px; font-weight: 800; border-radius: 999px; background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.18); z-index: 2; pointer-events: none; }
         .fc .fc-daygrid-day-frame { min-height: 140px; padding: 10px !important; }
@@ -194,28 +199,28 @@
             .calendar-search-input { width: 100%; }
         }
 
-        .section-heading { max-width:1280px; margin: 4px auto 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; }
+        .section-heading { max-width:1280px; margin: 4px auto 12px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; padding: 0 4px; }
         .section-heading span { display:block; font-size:11px; font-weight:850; color:var(--accent-blue); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:4px; }
         .section-heading h3 { margin:0; font-size:18px; font-weight:850; color:var(--text-main); letter-spacing:-0.03em; }
         .section-heading p { margin:0; font-size:12px; color:var(--text-muted); }
 
         /* FullCalendar 테마 오버라이딩 */
         #calendar {
-            background-color: var(--bg-card); padding: 20px; border-radius: 22px; 
-            border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%); padding: 18px; border-radius: 24px; 
+            border: 1px solid var(--border-color); box-shadow: 0 16px 35px rgba(15, 23, 42, 0.06);
         }
         .fc { color: var(--text-main) !important; }
-        .fc th { border-color: #dbe4f0 !important; background-color: #eef4ff; color: var(--navy-800); }
-        .fc td { border-color: var(--border-color) !important; }
-        .fc-theme-standard .fc-scrollgrid { border-color: var(--border-color) !important; border-radius: 8px; overflow: hidden; }
+        .fc th { border-color: #dbe4f0 !important; background: linear-gradient(180deg, #f7faff 0%, #eef4ff 100%); color: var(--navy-800); }
+        .fc td { border-color: #e5ebf3 !important; }
+        .fc-theme-standard .fc-scrollgrid { border-color: var(--border-color) !important; border-radius: 12px; overflow: hidden; }
         
         .fc .fc-toolbar-title { font-size: 18px !important; font-weight: 850 !important; color: var(--navy-800) !important; letter-spacing:-0.03em; }
-        .fc .fc-daygrid-day-frame { min-height: 116px; transition: background-color 0.16s ease, box-shadow 0.16s ease; }
+        .fc .fc-daygrid-day-frame { min-height: 116px; padding: 6px !important; transition: background-color 0.16s ease, box-shadow 0.16s ease; }
         .fc .fc-daygrid-day-frame:hover { background: #f8fbff; box-shadow: inset 0 0 0 1px rgba(15, 76, 129, 0.14); }
-        .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 700 !important; color: #475569 !important; padding: 8px !important; }
-        .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 32px; }
+        .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 700 !important; color: #475569 !important; padding: 6px 2px 0 2px !important; }
+        .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 28px; }
         .fc .fc-daygrid-day-number { margin-right: auto !important; }
-        .calendar-day-target-sum { position: absolute; top: 7px; right: 7px; color: #0f4c81; background:#eaf2ff; border:1px solid #cfe0f6; border-radius:999px; padding:3px 7px; font-size: 10.5px; line-height:1; font-weight: 900; pointer-events: none; letter-spacing: 0; box-shadow:0 1px 2px rgba(15, 23, 42, 0.04); }
+        .calendar-day-target-sum { position: absolute; top: 6px; right: 6px; color: #0f4c81; background:#eaf2ff; border:1px solid #cfe0f6; border-radius:999px; padding:3px 7px; font-size: 10.5px; line-height:1; font-weight: 900; pointer-events: none; letter-spacing: 0; box-shadow:0 1px 2px rgba(15, 23, 42, 0.04); }
 
         .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13px !important; font-weight: 600 !important; padding: 10px 0 !important; color: #475569; }
         
@@ -229,14 +234,15 @@
         .fc-daygrid-more-link { font-size: 11px !important; font-weight: 600 !important; color: var(--accent-blue) !important; }
         
         /* 캘린더 내부 일정 막대 디자인 */
-        .fc-event { cursor: pointer; padding: 4px 7px; border-radius: 6px !important; border: none !important; margin-bottom: 3px !important; transition: opacity 0.15s, transform 0.15s; }
-        .fc-event:hover { opacity: 0.85; }
-        .fc-event-title { font-weight: 600 !important; font-size: 11px; }
+        .fc-daygrid-day-events { display: flex !important; flex-direction: column !important; gap: 3px !important; overflow: hidden !important; }
+        .fc-event { cursor: pointer; padding: 4px 6px; border-radius: 7px !important; border: none !important; margin-bottom: 0 !important; transition: opacity 0.15s, transform 0.15s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06); }
+        .fc-event:hover { opacity: 0.9; transform: translateY(-1px); }
+        .fc-event-title { font-weight: 600 !important; font-size: 10.5px; line-height: 1.2; }
         
-        .event-start { background-color: #eaf2ff !important; border-left: 3px solid var(--navy-700) !important; }
+        .event-start { background: linear-gradient(90deg, #eaf2ff 0%, #dbeafe 100%) !important; border-left: 3px solid var(--navy-700) !important; }
         .event-start .fc-event-title { color: var(--navy-800) !important; }
         
-        .event-end { background-color: #f1f5f9 !important; border-left: 3px solid var(--end-color) !important; }
+        .event-end { background: linear-gradient(90deg, #f8fafc 0%, #eef2f7 100%) !important; border-left: 3px solid var(--end-color) !important; }
         .event-end .fc-event-title { color: #475569 !important; }
 
         /* 간트차트 뷰 레이아웃 */
@@ -387,8 +393,17 @@
                     </div>
                     <span class="overview-badge">오늘 기준</span>
                 </div>
-                <div class="chart-wrap"><canvas id="weeklyBannerCapaChart"></canvas></div>
-                <div id="weeklyBannerCapaList" class="weekly-capa-list" aria-label="주간 배너 CAPA 잔여 목록"></div>
+                <div class="weekly-capacity-chart-grid">
+                    <div class="weekly-capacity-chart-card">
+                        <div class="weekly-capacity-chart-title">배너 잔여 CAPA</div>
+                        <div class="chart-wrap"><canvas id="weeklyBannerCapaChart"></canvas></div>
+                    </div>
+                    <div class="weekly-capacity-chart-card">
+                        <div class="weekly-capacity-chart-title">쿠폰 잔여 CAPA</div>
+                        <div class="chart-wrap"><canvas id="weeklyCouponCapaChart"></canvas></div>
+                    </div>
+                </div>
+                <div id="weeklyBannerCapaList" class="weekly-capa-list" aria-label="주간 배너/쿠폰 CAPA 잔여 목록"></div>
             </div>
         </section>
         
@@ -727,37 +742,53 @@
             const baseDateStr = new Date(today.getTime() - offset).toISOString().split('T')[0];
             for (let i = 0; i < 7; i++) {
                 const dateStr = getDateOffset(baseDateStr, i);
-                const capa = getDailyCapa('banner', dateStr);
-                const used = getDailyBannerUsage(dateStr);
-                const remain = capa - used;
-                week.push({ dateStr, label: getDayLabel(dateStr), capa, used, remain, crowded: used > 2000000 });
+                const bannerCapa = getDailyCapa('banner', dateStr);
+                const bannerUsed = getDailyUsed('banner', dateStr);
+                const bannerRemain = bannerCapa - bannerUsed;
+                const couponCapa = getDailyCapa('coupon', dateStr);
+                const couponUsed = getDailyUsed('coupon', dateStr);
+                const couponRemain = couponCapa - couponUsed;
+                week.push({
+                    dateStr,
+                    label: getDayLabel(dateStr),
+                    bannerCapa,
+                    bannerUsed,
+                    bannerRemain,
+                    couponCapa,
+                    couponUsed,
+                    couponRemain,
+                    crowded: bannerUsed > 2000000
+                });
             }
             return week;
         }
 
         function renderWeeklyBannerCapa() {
-            const canvas = document.getElementById('weeklyBannerCapaChart');
+            const bannerCanvas = document.getElementById('weeklyBannerCapaChart');
+            const couponCanvas = document.getElementById('weeklyCouponCapaChart');
             const listWrap = document.getElementById('weeklyBannerCapaList');
-            if (!canvas || !listWrap || typeof Chart === 'undefined') return;
+            if (!bannerCanvas || !couponCanvas || !listWrap || typeof Chart === 'undefined') return;
 
             const week = buildWeeklyBannerCapaData();
             const labels = week.map(item => item.label);
-            const remainData = week.map(item => Math.max(item.remain, 0));
+            const bannerRemainData = week.map(item => Math.max(item.bannerRemain, 0));
+            const couponRemainData = week.map(item => Math.max(item.couponRemain, 0));
 
             if (weeklyBannerCapaChart) weeklyBannerCapaChart.destroy();
-            weeklyBannerCapaChart = new Chart(canvas, {
+            weeklyBannerCapaChart = new Chart(bannerCanvas, {
                 type: 'bar',
                 data: {
                     labels,
                     datasets: [{
                         label: '잔여 배너 CAPA',
-                        data: remainData,
-                        backgroundColor: week.map(item => item.remain < 0 ? '#ef4444' : '#0f4c81'),
+                        data: bannerRemainData,
+                        backgroundColor: week.map(item => item.bannerRemain < 0 ? '#dc2626' : '#475569'),
                         borderRadius: 8,
-                        maxBarThickness: 24
+                        maxBarThickness: 16
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -766,28 +797,69 @@
                             callbacks: {
                                 label: ctx => {
                                     const item = week[ctx.dataIndex] || {};
-                                    const remainText = formatTargetNumber(item.remain);
-                                    const usedText = formatTargetNumber(item.used);
+                                    const remainText = formatTargetNumber(item.bannerRemain);
+                                    const usedText = formatTargetNumber(item.bannerUsed);
                                     return `잔여 ${remainText} · 사용 ${usedText}`;
                                 }
                             }
                         }
                     },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } },
-                        y: { beginAtZero: true, ticks: { callback: value => formatTargetNumber(value), font: { size: 11 } }, grid: { color: 'rgba(148,163,184,0.18)' } }
+                        x: { beginAtZero: true, ticks: { callback: value => formatTargetNumber(value), font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.18)' } },
+                        y: { ticks: { font: { size: 10, weight: '600' } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            if (weeklyCouponCapaChart) weeklyCouponCapaChart.destroy();
+            weeklyCouponCapaChart = new Chart(couponCanvas, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: '잔여 쿠폰 CAPA',
+                        data: couponRemainData,
+                        backgroundColor: week.map(item => item.couponRemain < 0 ? '#ef4444' : '#94a3b8'),
+                        borderRadius: 8,
+                        maxBarThickness: 16
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => {
+                                    const item = week[ctx.dataIndex] || {};
+                                    const remainText = formatTargetNumber(item.couponRemain);
+                                    const usedText = formatTargetNumber(item.couponUsed);
+                                    return `잔여 ${remainText} · 사용 ${usedText}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { callback: value => formatTargetNumber(value), font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.18)' } },
+                        y: { ticks: { font: { size: 10, weight: '600' } }, grid: { display: false } }
                     }
                 }
             });
 
             listWrap.innerHTML = week.map(item => {
-                const remainLabel = item.remain < 0
-                    ? `잔여 0만 · 초과 ${formatTargetNumber(item.remain)}`
-                    : `잔여 ${formatTargetNumber(item.remain)}`;
+                const bannerRemainLabel = item.bannerRemain < 0
+                    ? `배너 잔여 0만 · 초과 ${formatTargetNumber(item.bannerRemain)}`
+                    : `배너 잔여 ${formatTargetNumber(item.bannerRemain)}`;
+                const couponRemainLabel = item.couponRemain < 0
+                    ? `쿠폰 잔여 0만 · 초과 ${formatTargetNumber(item.couponRemain)}`
+                    : `쿠폰 잔여 ${formatTargetNumber(item.couponRemain)}`;
                 return `
-                    <div class="weekly-capa-item ${item.remain < 0 ? 'warning' : ''}">
+                    <div class="weekly-capa-item ${item.bannerRemain < 0 || item.couponRemain < 0 ? 'warning' : ''}">
                         <div class="weekly-capa-day">${item.label}</div>
-                        <div class="weekly-capa-value">${remainLabel}</div>
+                        <div class="weekly-capa-value">${bannerRemainLabel}</div>
+                        <div class="weekly-capa-value small">${couponRemainLabel}</div>
                     </div>`;
             }).join('');
         }
