@@ -27,9 +27,11 @@
             --gantt-bar-border: #0f4c81;
         }
 
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
         body {
             margin: 0; padding: 24px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background:
                 linear-gradient(180deg, #071a33 0, #0b2a4a 210px, var(--bg-main) 210px, var(--bg-main) 100%);
             color: var(--text-main);
@@ -106,7 +108,7 @@
         .weekly-capa-value { font-size: 13px; font-weight: 800; }
         .weekly-capa-value.small { font-size: 11px; margin-top: 4px; color: var(--text-muted); }
         .weekly-capa-item.warning .weekly-capa-value { color: #b91c1c; }
-        .calendar-day-congestion-badge { display: inline-flex; align-items: center; justify-content: center; position: absolute; top: 6px; right: 6px; padding: 2px 7px; font-size: 10px; font-weight: 800; border-radius: 999px; background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.18); z-index: 2; pointer-events: none; }
+        .calendar-day-congestion-badge { display: inline-flex; align-items: center; justify-content: center; position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; font-size: 9px; font-weight: 800; border-radius: 999px; background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); z-index: 2; pointer-events: none; }
         .fc .fc-daygrid-day-frame { min-height: 140px; padding: 10px !important; }
         .fc .fc-daygrid-day-events { margin-top: 8px; display: grid; gap: 4px; }
         .fc .fc-event { padding: 6px 8px !important; font-size: 11px; border-radius: 10px !important; }
@@ -220,7 +222,7 @@
         .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 700 !important; color: #475569 !important; padding: 6px 2px 0 2px !important; }
         .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 28px; }
         .fc .fc-daygrid-day-number { margin-right: auto !important; }
-        .calendar-day-target-sum { position: absolute; top: 6px; right: 6px; color: #0f4c81; background:#eaf2ff; border:1px solid #cfe0f6; border-radius:999px; padding:3px 7px; font-size: 10.5px; line-height:1; font-weight: 900; pointer-events: none; letter-spacing: 0; box-shadow:0 1px 2px rgba(15, 23, 42, 0.04); }
+        .calendar-day-target-sum { position: absolute; top: 6px; right: 6px; color: #64748b; background: transparent; border: 0; border-radius: 0; padding: 0; font-size: 10.5px; line-height:1; font-weight: 600; pointer-events: none; letter-spacing: 0; box-shadow: none; }
 
         .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13px !important; font-weight: 600 !important; padding: 10px 0 !important; color: #475569; }
         
@@ -622,7 +624,10 @@
                 const filterText = (item['필터'] || '').toUpperCase();
                 const targetValue = getTargetValue(item);
                 if (type === 'banner' && (filterText.includes('SEG') || filterText.includes('배너'))) return sum + targetValue;
-                if (type === 'coupon' && filterText.includes('쿠폰')) return sum + targetValue;
+                if (type === 'coupon') {
+                    const couponValue = Number(String(item['쿠폰'] || item['Coupon'] || '').replace(/[^0-9]/g, '')) || 0;
+                    if (filterText.includes('쿠폰') || couponValue > 0) return sum + (couponValue || targetValue);
+                }
                 return sum;
             }, 0);
         }
