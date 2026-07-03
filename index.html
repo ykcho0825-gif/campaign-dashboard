@@ -7,6 +7,7 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js'></script>
     <style>
         :root {
             --bg-main: #f4f7fb;
@@ -101,13 +102,14 @@
         .monthly-summary-title { margin-top: 12px; font-size: 12px; font-weight: 900; color: var(--navy-800); letter-spacing: -0.02em; }
         .monthly-channel-value span { color:var(--text-muted); font-size:11px; font-weight:800; margin-left:3px; }
         .weekly-capacity-row { max-width: 1280px; margin: 0 auto 14px; }
-        .weekly-capa-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
-        .weekly-capa-item { background: transparent; border: 0; padding: 0; text-align: left; font-size: 11px; color: var(--text-main); }
-        .weekly-capa-day { font-weight: 700; color: #475569; margin-bottom: 3px; }
-        .weekly-capa-value { font-size: 12px; font-weight: 700; color: #334155; }
-        .weekly-capa-value.small { font-size: 11px; margin-top: 2px; color: var(--text-muted); }
-        .weekly-capa-item.warning .weekly-capa-value { color: #b91c1c; }
-        .calendar-day-congestion-badge { display: inline-flex; align-items: center; justify-content: center; position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; font-size: 9px; font-weight: 800; border-radius: 999px; background: #e2e8f0; color: #dc2626; border: 1px solid #cbd5e1; z-index: 2; pointer-events: none; }
+        .weekly-capa-list { display: none; }
+        .calendar-day-congestion-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            position: absolute; bottom: 4px; right: 4px; width: 8px; height: 8px;
+            border-radius: 999px; background: rgba(239, 68, 68, 0.35);
+            border: 1px solid rgba(239, 68, 68, 0.7); box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.9);
+            z-index: 2; pointer-events: none;
+        }
         .fc .fc-daygrid-day-frame { min-height: 140px; padding: 10px !important; }
         .fc .fc-daygrid-day-events { margin-top: 8px; display: grid; gap: 4px; }
         .fc .fc-event { padding: 6px 8px !important; font-size: 11px; border-radius: 10px !important; }
@@ -482,6 +484,10 @@
         let weeklyBannerCapaChart = null;
         let weeklyCouponCapaChart = null;
 
+        if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             fetchDataFromCSV();
 
@@ -784,7 +790,7 @@
             const bannerCanvas = document.getElementById('weeklyBannerCapaChart');
             const couponCanvas = document.getElementById('weeklyCouponCapaChart');
             const listWrap = document.getElementById('weeklyBannerCapaList');
-            if (!bannerCanvas || !couponCanvas || !listWrap || typeof Chart === 'undefined') return;
+            if (!bannerCanvas || !couponCanvas || typeof Chart === 'undefined') return;
 
             const week = buildWeeklyBannerCapaData();
             const labels = week.map(item => item.label);
@@ -819,6 +825,14 @@
                                     return `잔여 ${remainText} · 사용 ${usedText}`;
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true,
+                            anchor: 'end',
+                            align: 'right',
+                            formatter: (value) => formatTargetNumber(value),
+                            color: '#334155',
+                            font: { weight: '700', size: 10 }
                         }
                     },
                     scales: {
@@ -856,6 +870,14 @@
                                     return `잔여 ${remainText} · 사용 ${usedText}`;
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true,
+                            anchor: 'end',
+                            align: 'right',
+                            formatter: (value) => formatTargetNumber(value),
+                            color: '#334155',
+                            font: { weight: '700', size: 10 }
                         }
                     },
                     scales: {
@@ -865,20 +887,6 @@
                 }
             });
 
-            listWrap.innerHTML = week.map(item => {
-                const bannerRemainLabel = item.bannerRemain < 0
-                    ? `배너: 0만`
-                    : `배너: ${formatTargetNumber(item.bannerRemain)}`;
-                const couponRemainLabel = item.couponRemain < 0
-                    ? `쿠폰: 0만`
-                    : `쿠폰: ${formatTargetNumber(item.couponRemain)}`;
-                return `
-                    <div class="weekly-capa-item ${item.bannerRemain < 0 || item.couponRemain < 0 ? 'warning' : ''}">
-                        <div class="weekly-capa-day">${item.label}</div>
-                        <div class="weekly-capa-value">${bannerRemainLabel}</div>
-                        <div class="weekly-capa-value small">${couponRemainLabel}</div>
-                    </div>`;
-            }).join('');
         }
 
         function processEvents(data) {
