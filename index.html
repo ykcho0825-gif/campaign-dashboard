@@ -390,8 +390,8 @@
             <div class="overview-card">
                 <div class="overview-card-header">
                     <div>
-                        <h3 class="overview-title">7일 배너 CAPA 잔여</h3>
-                        <div class="overview-subtitle">오늘 기준 다음 7일간 배너 잔여 용량을 그래프와 숫자로 확인하세요.</div>
+                        <h3 class="overview-title">7일 배너/쿠폰 CAPA 잔여</h3>
+                        <div class="overview-subtitle">오늘 기준 다음 7일간 배너/쿠폰 잔여 용량을 그래프와 숫자로 확인하세요.</div>
                     </div>
                     <span class="overview-badge">오늘 기준</span>
                 </div>
@@ -481,6 +481,7 @@
         let currentFilteredEvents = [];
         let monthlyChannelChart = null; 
         let weeklyBannerCapaChart = null;
+        let weeklyCouponCapaChart = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             fetchDataFromCSV();
@@ -565,6 +566,18 @@
             return targetValue;
         }
 
+        function getCouponValue(item) {
+            const keys = Object.keys(item || {}).filter(k => {
+                const normalizedKey = String(k).replace(/\s+/g, '').toUpperCase();
+                return normalizedKey.includes('쿠폰');
+            });
+            for (const key of keys) {
+                const cleanNum = String(item[key]).replace(/[^0-9]/g, '');
+                if (cleanNum) return Number(cleanNum);
+            }
+            return 0;
+        }
+
         function getTvToastDeliveryTargetValue(item, activeFilters = []) {
             const filterText = (item['필터'] || '').toUpperCase();
             const includeAll = !activeFilters || activeFilters.length === 0;
@@ -625,7 +638,7 @@
                 const targetValue = getTargetValue(item);
                 if (type === 'banner' && (filterText.includes('SEG') || filterText.includes('배너'))) return sum + targetValue;
                 if (type === 'coupon') {
-                    const couponValue = Number(String(item['쿠폰'] || item['Coupon'] || '').replace(/[^0-9]/g, '')) || 0;
+                    const couponValue = getCouponValue(item);
                     if (filterText.includes('쿠폰') || couponValue > 0) return sum + (couponValue || targetValue);
                 }
                 return sum;
@@ -787,7 +800,7 @@
                     datasets: [{
                         label: '잔여 배너 CAPA',
                         data: bannerRemainData,
-                        backgroundColor: week.map(item => item.bannerRemain < 0 ? '#dc2626' : '#475569'),
+                        backgroundColor: week.map(item => item.bannerRemain < 0 ? '#dc2626' : '#64748b'),
                         borderRadius: 8,
                         maxBarThickness: 16
                     }]
@@ -824,7 +837,7 @@
                     datasets: [{
                         label: '잔여 쿠폰 CAPA',
                         data: couponRemainData,
-                        backgroundColor: week.map(item => item.couponRemain < 0 ? '#ef4444' : '#94a3b8'),
+                        backgroundColor: week.map(item => item.couponRemain < 0 ? '#dc2626' : '#94a3b8'),
                         borderRadius: 8,
                         maxBarThickness: 16
                     }]
