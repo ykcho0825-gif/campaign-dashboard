@@ -103,13 +103,6 @@
         .monthly-channel-value span { color:var(--text-muted); font-size:11px; font-weight:800; margin-left:3px; }
         .weekly-capacity-row { max-width: 1280px; margin: 0 auto 14px; }
         .weekly-capa-list { display: none; }
-        .calendar-day-congestion-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            position: absolute; bottom: 4px; right: 4px; width: 8px; height: 8px;
-            border-radius: 999px; background: rgba(239, 68, 68, 0.35);
-            border: 1px solid rgba(239, 68, 68, 0.7); box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.9);
-            z-index: 2; pointer-events: none;
-        }
         .fc .fc-daygrid-day-frame { min-height: 140px; padding: 10px !important; }
         .fc .fc-daygrid-day-events { margin-top: 8px; display: grid; gap: 4px; }
         .fc .fc-event { padding: 6px 8px !important; font-size: 11px; border-radius: 10px !important; }
@@ -957,17 +950,11 @@
                 el.innerText = total > 0 ? `(${formatTargetNumber(total)})` : '';
 
                 const topEl = el.parentElement;
-                const bannerUsage = getDailyBannerUsage(dateStr);
-                let badge = topEl.querySelector('.calendar-day-congestion-badge');
-                if (bannerUsage > 2000000) {
-                    if (!badge) {
-                        badge = document.createElement('span');
-                        badge.className = 'calendar-day-congestion-badge';
-                        badge.innerText = '혼잡';
-                        topEl.appendChild(badge);
+                if (topEl) {
+                    const existingBadge = topEl.querySelector('.calendar-day-congestion-badge');
+                    if (existingBadge) {
+                        existingBadge.remove();
                     }
-                } else if (badge) {
-                    badge.remove();
                 }
             });
         }
