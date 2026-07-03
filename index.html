@@ -199,10 +199,12 @@
         .fc-theme-standard .fc-scrollgrid { border-color: var(--border-color) !important; border-radius: 8px; overflow: hidden; }
         
         .fc .fc-toolbar-title { font-size: 18px !important; font-weight: 850 !important; color: var(--navy-800) !important; letter-spacing:-0.03em; }
-        .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 600 !important; color: #475569 !important; padding: 8px !important; }
-        .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 26px; }
+        .fc .fc-daygrid-day-frame { min-height: 116px; transition: background-color 0.16s ease, box-shadow 0.16s ease; }
+        .fc .fc-daygrid-day-frame:hover { background: #f8fbff; box-shadow: inset 0 0 0 1px rgba(15, 76, 129, 0.14); }
+        .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 700 !important; color: #475569 !important; padding: 8px !important; }
+        .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 32px; }
         .fc .fc-daygrid-day-number { margin-right: auto !important; }
-        .calendar-day-target-sum { position: absolute; top: 8px; right: 8px; color: #94a3b8; font-size: 11px; font-weight: 800; pointer-events: none; letter-spacing: -0.02em; }
+        .calendar-day-target-sum { position: absolute; top: 7px; right: 7px; color: #0f4c81; background:#eaf2ff; border:1px solid #cfe0f6; border-radius:999px; padding:3px 7px; font-size: 10.5px; line-height:1; font-weight: 900; pointer-events: none; letter-spacing: 0; box-shadow:0 1px 2px rgba(15, 23, 42, 0.04); }
 
         .fc .fc-col-header-cell .fc-scrollgrid-sync-inner { font-size: 13px !important; font-weight: 600 !important; padding: 10px 0 !important; color: #475569; }
         
@@ -216,7 +218,7 @@
         .fc-daygrid-more-link { font-size: 11px !important; font-weight: 600 !important; color: var(--accent-blue) !important; }
         
         /* 캘린더 내부 일정 막대 디자인 */
-        .fc-event { cursor: pointer; padding: 3px 6px; border-radius: 4px !important; border: none !important; margin-bottom: 2px !important; transition: opacity 0.15s; }
+        .fc-event { cursor: pointer; padding: 4px 7px; border-radius: 6px !important; border: none !important; margin-bottom: 3px !important; transition: opacity 0.15s, transform 0.15s; }
         .fc-event:hover { opacity: 0.85; }
         .fc-event-title { font-weight: 600 !important; font-size: 11px; }
         
@@ -359,7 +361,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="capa-btn" onclick="runCapaAssistant()">가능 여부 확인</button>
+                <button class="capa-btn" onclick="openScheduleRequestSheet()">캠페인 스케쥴 반영 요청</button>
                 <div class="capa-helper-text">배너 CAPA는 일 280만, 목요일은 270만 / 쿠폰은 일 270만 기준입니다.</div>
                 <div class="capa-result-list" id="capaResultList"></div>
             </div>
@@ -424,6 +426,11 @@
 
     <script>
         const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJDqgcPmC1RsB_57OgHxXZ9uqKNiGDICkSKqftjk6CbflfyhVWA2G0LrqLBwuQtTNsffKBtc-aKbD0/pub?output=csv';
+        const SCHEDULE_REQUEST_URL = 'https://docs.google.com/spreadsheets/d/1BdzZj8Rr-9Twi7seNBGLomHm1FH__Rc-OtLEdTGyLmA/edit?gid=834849830&range=B907#gid=834849830';
+
+        function openScheduleRequestSheet() {
+            window.open(SCHEDULE_REQUEST_URL, '_blank', 'noopener');
+        }
 
         let rawSourceData = []; 
         let allEvents = [];
@@ -512,6 +519,15 @@
                 }
             });
             return targetValue;
+        }
+
+        function getTvToastDeliveryTargetValue(item, activeFilters = []) {
+            const filterText = (item['필터'] || '').toUpperCase();
+            const includeAll = !activeFilters || activeFilters.length === 0;
+            let channelCount = 0;
+            if ((includeAll || activeFilters.includes('TV')) && filterText.includes('TV')) channelCount += 1;
+            if ((includeAll || activeFilters.includes('토스트팝업')) && filterText.includes('토스트')) channelCount += 1;
+            return getTargetValue(item) * channelCount;
         }
 
         function getCampaignTitle(item) {
@@ -718,9 +734,10 @@
         }
 
         function getCalendarDailyTargetSum(dateStr) {
+            const activeFilters = Array.from(document.querySelectorAll('.type-filter:checked')).map(el => el.value);
             return currentFilteredEvents
                 .filter(e => e.extendedProps && e.extendedProps.type === 'start' && e.start === dateStr)
-                .reduce((sum, e) => sum + getTargetValue(e.extendedProps), 0);
+                .reduce((sum, e) => sum + getTvToastDeliveryTargetValue(e.extendedProps, activeFilters), 0);
         }
 
         function refreshCalendarDayTargetSums() {
@@ -1073,7 +1090,7 @@
                 const targetValue = getTargetValue(e.extendedProps);
                 if (filterText.includes('TV')) { monthMap[monthKey].tv += 1; monthMap[monthKey].tvTarget += targetValue; }
                 if (filterText.includes('토스트')) { monthMap[monthKey].toast += 1; monthMap[monthKey].toastTarget += targetValue; }
-                monthMap[monthKey].target += targetValue;
+                monthMap[monthKey].target += getTvToastDeliveryTargetValue(e.extendedProps);
             });
 
             return Object.values(monthMap).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
