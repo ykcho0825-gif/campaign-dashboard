@@ -317,6 +317,92 @@
         .modal-target-card-label { font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
         .modal-target-card-value { font-size: 14px; font-weight: 700; color: var(--text-main); }
         .capa-text { display: block; font-size: 10px; font-weight: 600; color: #0284c7; margin-top: 2px; }
+
+        /* 배너 CAPA 테이블 스타일 */
+        .banner-capa-table {
+            width: 100%; border-collapse: collapse; font-size: 12px;
+            background: #f8fafc; border-radius: 8px; overflow: hidden;
+        }
+        .banner-capa-table thead {
+            background: linear-gradient(180deg, #eef4ff 0%, #dbeafe 100%);
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .banner-capa-table th {
+            padding: 10px; text-align: left; font-weight: 700; color: #0f4c81;
+            border-right: 1px solid #cbd5e1;
+        }
+        .banner-capa-table th:last-child { border-right: none; }
+        .banner-capa-table td {
+            padding: 10px; border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0; color: #334155;
+        }
+        .banner-capa-table td:last-child { border-right: none; }
+        .banner-capa-table tbody tr:last-child td { border-bottom: none; }
+        .banner-capa-table tbody tr:hover { background: #ffffff; }
+        .banner-capa-progress-cell {
+            position: relative; height: 32px; display: flex; align-items: center;
+        }
+        .banner-capa-progress-bar {
+            position: absolute; left: 0; top: 0; height: 100%; background: linear-gradient(90deg, #93c5fd, #60a5fa);
+            border-radius: 4px; opacity: 0.4; z-index: 0;
+        }
+        .banner-capa-progress-text {
+            position: relative; z-index: 1; font-weight: 600; color: #0f172a;
+        }
+        .banner-capa-visual {
+            display: flex; align-items: center; gap: 4px;
+        }
+        .banner-capa-bar {
+            height: 6px; background: #e2e8f0; border-radius: 3px; min-width: 60px; flex: 1;
+            overflow: hidden;
+        }
+        .banner-capa-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); border-radius: 3px;
+        }
+
+        /* 신호등 혼잡도 배지 */
+        .calendar-congestion-badge {
+            display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+            margin-left: 4px; vertical-align: middle;
+        }
+        .calendar-congestion-badge.green { background: #22c55e; }
+        .calendar-congestion-badge.yellow { background: #eab308; }
+        .calendar-congestion-badge.red { background: #ef4444; }
+
+        /* 주차별 채널 필터 테이블 */
+        .weekly-channel-filter-container {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .weekly-filter-buttons {
+            display: flex; gap: 6px; flex-wrap: wrap;
+        }
+        .weekly-filter-btn {
+            padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1;
+            background: #f8fafc; color: #334155; font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .weekly-filter-btn:hover { border-color: #0f4c81; background: #e0f2fe; color: #0f4c81; }
+        .weekly-filter-btn.active { background: #0f4c81; color: #ffffff; border-color: #0f4c81; }
+        .weekly-channel-table {
+            width: 100%; border-collapse: collapse; font-size: 12px;
+            background: #f8fafc; border-radius: 8px; overflow: hidden;
+        }
+        .weekly-channel-table thead {
+            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .weekly-channel-table th {
+            padding: 10px; text-align: left; font-weight: 700; color: #0f4c81;
+            border-right: 1px solid #cbd5e1;
+        }
+        .weekly-channel-table th:last-child { border-right: none; }
+        .weekly-channel-table td {
+            padding: 10px; border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0; color: #334155;
+        }
+        .weekly-channel-table td:last-child { border-right: none; }
+        .weekly-channel-table tbody tr:last-child td { border-bottom: none; }
+        .weekly-channel-table tbody tr:hover { background: #ffffff; }
     </style>
 </head>
 <body>
@@ -385,18 +471,21 @@
                 <div class="overview-card-header">
                     <div>
                         <h3 class="overview-title">7일 배너/쿠폰 CAPA 잔여</h3>
-                        <div class="overview-subtitle">오늘 기준 다음 7일간 배너/쿠폰 잔여 용량을 그래프와 숫자로 확인하세요.</div>
+                        <div class="overview-subtitle">오늘 기준 다음 7일간 배너/쿠폰 잔여 용량을 표와 필터링으로 확인하세요.</div>
                     </div>
                     <span class="overview-badge">오늘 기준</span>
                 </div>
                 <div class="weekly-capacity-chart-grid">
                     <div class="weekly-capacity-chart-card">
                         <div class="weekly-capacity-chart-title">배너 잔여 CAPA</div>
-                        <div class="chart-wrap"><canvas id="weeklyBannerCapaChart"></canvas></div>
+                        <div id="bannerCapaTableContainer"></div>
                     </div>
                     <div class="weekly-capacity-chart-card">
                         <div class="weekly-capacity-chart-title">쿠폰 잔여 CAPA</div>
-                        <div class="chart-wrap"><canvas id="weeklyCouponCapaChart"></canvas></div>
+                        <div id="couponChannelFilterContainer" class="weekly-channel-filter-container">
+                            <div class="weekly-filter-buttons" id="weeklyChannelFilterButtons"></div>
+                            <div id="weeklyChannelTableContainer"></div>
+                        </div>
                     </div>
                 </div>
                 <div id="weeklyBannerCapaList" class="weekly-capa-list" aria-label="주간 배너/쿠폰 CAPA 잔여 목록"></div>
@@ -780,106 +869,158 @@
         }
 
         function renderWeeklyBannerCapa() {
-            const bannerCanvas = document.getElementById('weeklyBannerCapaChart');
-            const couponCanvas = document.getElementById('weeklyCouponCapaChart');
-            const listWrap = document.getElementById('weeklyBannerCapaList');
-            if (!bannerCanvas || !couponCanvas || typeof Chart === 'undefined') return;
+            const bannerContainer = document.getElementById('bannerCapaTableContainer');
+            const couponContainer = document.getElementById('couponChannelFilterContainer');
+            const filterButtonsContainer = document.getElementById('weeklyChannelFilterButtons');
+            const tableContainer = document.getElementById('weeklyChannelTableContainer');
+            
+            if (!bannerContainer || !couponContainer) return;
 
             const week = buildWeeklyBannerCapaData();
-            const labels = week.map(item => item.label);
-            const bannerRemainData = week.map(item => Math.max(item.bannerRemain, 0));
-            const couponRemainData = week.map(item => Math.max(item.couponRemain, 0));
 
-            if (weeklyBannerCapaChart) weeklyBannerCapaChart.destroy();
-            weeklyBannerCapaChart = new Chart(bannerCanvas, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: '잔여 배너 CAPA',
-                        data: bannerRemainData,
-                        backgroundColor: week.map(item => item.bannerRemain < 0 ? '#dc2626' : '#64748b'),
-                        borderRadius: 8,
-                        maxBarThickness: 16
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => {
-                                    const item = week[ctx.dataIndex] || {};
-                                    const remainText = formatTargetNumber(item.bannerRemain);
-                                    const usedText = formatTargetNumber(item.bannerUsed);
-                                    return `잔여 ${remainText} · 사용 ${usedText}`;
-                                }
-                            }
-                        },
-                        datalabels: {
-                            display: true,
-                            anchor: 'end',
-                            align: 'right',
-                            formatter: (value) => formatTargetNumber(value),
-                            color: '#334155',
-                            font: { weight: '700', size: 10 }
-                        }
-                    },
-                    scales: {
-                        x: { beginAtZero: true, ticks: { callback: value => formatTargetNumber(value), font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.18)' } },
-                        y: { ticks: { font: { size: 10, weight: '600' } }, grid: { display: false } }
-                    }
-                }
+            // 배너 CAPA 테이블 렌더링
+            let bannerTableHtml = `
+                <table class="banner-capa-table">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>사용</th>
+                            <th>잔여</th>
+                            <th>진행율</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            week.forEach(item => {
+                const usedPercent = Math.min((item.bannerUsed / item.bannerCapa) * 100, 100);
+                bannerTableHtml += `
+                    <tr>
+                        <td><strong>${item.label}</strong></td>
+                        <td>${formatTargetNumber(item.bannerUsed)}</td>
+                        <td style="color: ${item.bannerRemain < 0 ? '#dc2626' : '#059669'}; font-weight: 700;">
+                            ${formatTargetNumber(Math.max(item.bannerRemain, 0))}
+                        </td>
+                        <td>
+                            <div class="banner-capa-visual">
+                                <div class="banner-capa-bar">
+                                    <div class="banner-capa-bar-fill" style="width: ${usedPercent}%"></div>
+                                </div>
+                                <span style="font-size: 10px; color: #64748b; min-width: 30px; text-align: right;">
+                                    ${Math.round(usedPercent)}%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
+            
+            bannerTableHtml += `</tbody></table>`;
+            bannerContainer.innerHTML = bannerTableHtml;
 
-            if (weeklyCouponCapaChart) weeklyCouponCapaChart.destroy();
-            weeklyCouponCapaChart = new Chart(couponCanvas, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: '잔여 쿠폰 CAPA',
-                        data: couponRemainData,
-                        backgroundColor: week.map(item => item.couponRemain < 0 ? '#dc2626' : '#94a3b8'),
-                        borderRadius: 8,
-                        maxBarThickness: 16
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => {
-                                    const item = week[ctx.dataIndex] || {};
-                                    const remainText = formatTargetNumber(item.couponRemain);
-                                    const usedText = formatTargetNumber(item.couponUsed);
-                                    return `잔여 ${remainText} · 사용 ${usedText}`;
-                                }
-                            }
-                        },
-                        datalabels: {
-                            display: true,
-                            anchor: 'end',
-                            align: 'right',
-                            formatter: (value) => formatTargetNumber(value),
-                            color: '#334155',
-                            font: { weight: '700', size: 10 }
-                        }
-                    },
-                    scales: {
-                        x: { beginAtZero: true, ticks: { callback: value => formatTargetNumber(value), font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.18)' } },
-                        y: { ticks: { font: { size: 10, weight: '600' } }, grid: { display: false } }
-                    }
-                }
+            // 쿠폰 CAPA - 주차별 채널별 발송 건수 필터링
+            const weeklyChannelData = buildWeeklyChannelData(week);
+            const allChannels = ['배너', '쿠폰', 'TV팝업', '토스트팝업'];
+            
+            // 필터 버튼 렌더링
+            filterButtonsContainer.innerHTML = '';
+            const filterAllBtn = document.createElement('button');
+            filterAllBtn.className = 'weekly-filter-btn active';
+            filterAllBtn.textContent = '전체';
+            filterAllBtn.onclick = () => updateWeeklyChannelDisplay(weeklyChannelData, []);
+            filterButtonsContainer.appendChild(filterAllBtn);
+            
+            allChannels.forEach(channel => {
+                const btn = document.createElement('button');
+                btn.className = 'weekly-filter-btn';
+                btn.textContent = channel;
+                btn.onclick = () => {
+                    document.querySelectorAll('.weekly-filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterAllBtn.classList.remove('active');
+                    updateWeeklyChannelDisplay(weeklyChannelData, [channel]);
+                };
+                filterButtonsContainer.appendChild(btn);
             });
+            
+            // 초기 테이블 렌더링
+            updateWeeklyChannelDisplay(weeklyChannelData, []);
+        }
 
+        function buildWeeklyChannelData(week) {
+            const channelData = {};
+            
+            week.forEach(day => {
+                const dateStr = day.dateStr;
+                channelData[dateStr] = {
+                    label: day.label,
+                    banner: getDailyChannelCount('배너', dateStr),
+                    coupon: getDailyChannelCount('쿠폰', dateStr),
+                    tvPopup: getDailyChannelCount('TV팝업', dateStr),
+                    toastPopup: getDailyChannelCount('토스트팝업', dateStr)
+                };
+            });
+            
+            return channelData;
+        }
+
+        function getDailyChannelCount(channel, dateStr) {
+            return rawSourceData.reduce((sum, item) => {
+                const start = cleanDateStr(item['시작일']);
+                if (start !== dateStr) return sum;
+                const filterText = (item['필터'] || '').toUpperCase();
+                
+                if (channel === '배너' && (filterText.includes('SEG') || filterText.includes('배너'))) return sum + 1;
+                if (channel === '쿠폰' && filterText.includes('쿠폰')) return sum + 1;
+                if (channel === 'TV팝업' && filterText.includes('TV')) return sum + 1;
+                if (channel === '토스트팝업' && filterText.includes('토스트')) return sum + 1;
+                
+                return sum;
+            }, 0);
+        }
+
+        function updateWeeklyChannelDisplay(weeklyChannelData, activeFilter) {
+            const tableContainer = document.getElementById('weeklyChannelTableContainer');
+            const allChannels = ['배너', '쿠폰', 'TV팝업', '토스트팝업'];
+            const displayChannels = activeFilter.length === 0 ? allChannels : activeFilter;
+            
+            let tableHtml = `
+                <table class="weekly-channel-table">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            ${displayChannels.map(ch => `<th>${ch}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            Object.keys(weeklyChannelData).forEach(dateStr => {
+                const data = weeklyChannelData[dateStr];
+                tableHtml += `<tr><td><strong>${data.label}</strong></td>`;
+                
+                if (activeFilter.length === 0) {
+                    tableHtml += `
+                        <td>${data.banner}건</td>
+                        <td>${data.coupon}건</td>
+                        <td>${data.tvPopup}건</td>
+                        <td>${data.toastPopup}건</td>
+                    `;
+                } else if (activeFilter.includes('배너')) {
+                    tableHtml += `<td><strong style="color: #0f4c81;">${data.banner}건</strong></td>`;
+                } else if (activeFilter.includes('쿠폰')) {
+                    tableHtml += `<td><strong style="color: #0f4c81;">${data.coupon}건</strong></td>`;
+                } else if (activeFilter.includes('TV팝업')) {
+                    tableHtml += `<td><strong style="color: #0f4c81;">${data.tvPopup}건</strong></td>`;
+                } else if (activeFilter.includes('토스트팝업')) {
+                    tableHtml += `<td><strong style="color: #0f4c81;">${data.toastPopup}건</strong></td>`;
+                }
+                
+                tableHtml += `</tr>`;
+            });
+            
+            tableHtml += `</tbody></table>`;
+            tableContainer.innerHTML = tableHtml;
         }
 
         function processEvents(data) {
@@ -951,10 +1092,27 @@
 
                 const topEl = el.parentElement;
                 if (topEl) {
-                    const existingBadge = topEl.querySelector('.calendar-day-congestion-badge');
+                    const existingBadge = topEl.querySelector('.calendar-congestion-badge');
                     if (existingBadge) {
                         existingBadge.remove();
                     }
+                    
+                    // 신호등 배지 재생성
+                    const bannerUsed = getDailyUsed('banner', dateStr);
+                    let congestionClass = '';
+                    
+                    if (bannerUsed < 1000000) {
+                        congestionClass = 'green';
+                    } else if (bannerUsed < 2000000) {
+                        congestionClass = 'yellow';
+                    } else {
+                        congestionClass = 'red';
+                    }
+                    
+                    const badge = document.createElement('span');
+                    badge.className = `calendar-congestion-badge ${congestionClass}`;
+                    badge.setAttribute('title', `배너 사용: ${formatTargetNumber(bannerUsed)}`);
+                    topEl.appendChild(badge);
                 }
             });
         }
@@ -984,6 +1142,26 @@
                         sumEl.className = 'calendar-day-target-sum';
                         sumEl.setAttribute('data-date', toLocalDateStr(info.date));
                         topEl.appendChild(sumEl);
+                    }
+                    
+                    // 배너 혼잡도 신호등 추가
+                    const dateStr = toLocalDateStr(info.date);
+                    const bannerUsed = getDailyUsed('banner', dateStr);
+                    let congestionClass = '';
+                    
+                    if (bannerUsed < 1000000) {
+                        congestionClass = 'green';
+                    } else if (bannerUsed < 2000000) {
+                        congestionClass = 'yellow';
+                    } else {
+                        congestionClass = 'red';
+                    }
+                    
+                    if (topEl && !topEl.querySelector('.calendar-congestion-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = `calendar-congestion-badge ${congestionClass}`;
+                        badge.setAttribute('title', `배너 사용: ${formatTargetNumber(bannerUsed)}`);
+                        topEl.appendChild(badge);
                     }
                     
                     cellEl.addEventListener('mouseenter', function(e) {
@@ -1347,6 +1525,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, weight: '600' } } },
+                        datalabels: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: ctx => {
