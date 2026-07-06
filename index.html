@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head> 
+<head>
     <meta charset='utf-8' />
     <title>B tv Campaign Dashboard V9.2</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
@@ -125,6 +125,22 @@
         .capa-result-desc { font-size:11.5px; color:var(--text-muted); line-height:1.45; }
         .capa-reco { margin-top:6px; font-size:11.5px; color:var(--accent-blue); font-weight:800; }
         .capa-helper-text { font-size:11px; color:var(--text-muted); line-height:1.45; }
+
+        .request-btn { background: #e0f2fe; color: var(--accent-blue); border-color: rgba(14, 165, 233, 0.35); }
+        .request-modal-content { width: min(760px, calc(100vw - 36px)); margin: 4% auto; max-height: 86vh; overflow-y: auto; }
+        .request-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .request-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .request-field.full { grid-column: 1 / -1; }
+        .request-field label { font-size: 11px; font-weight: 850; color: var(--text-muted); }
+        .request-input { width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 11px; font-size: 13px; color: var(--text-main); background: #fff; outline: none; }
+        .request-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.10); }
+        .request-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+        .request-submit-btn, .request-cancel-btn { border: 0; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 900; cursor: pointer; }
+        .request-submit-btn { background: linear-gradient(135deg, var(--navy-800), var(--navy-700)); color: #fff; }
+        .request-cancel-btn { background: #f1f5f9; color: #334155; }
+        .request-status { min-height: 18px; margin-top: 10px; font-size: 12px; font-weight: 800; color: var(--accent-blue); }
+        .request-submit-frame { display: none; width: 0; height: 0; border: 0; }
+        @media (max-width: 720px) { .request-form-grid { grid-template-columns: 1fr; } .request-modal-content { margin: 18px auto; } }
 
         .control-panel { display: grid; grid-template-columns: minmax(360px, 1.35fr) minmax(150px, 0.55fr) minmax(220px, 0.8fr) minmax(220px, 0.8fr); align-items: end; gap: 10px; margin-bottom: 14px; }
         .filter-title { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
@@ -347,6 +363,7 @@
         <div class="top-row">
             <div class="title-section"><h2>B tv Campaign Dashboard</h2><p>월별 채널 발송 흐름과 캠페인 일정을 한 번에 확인합니다.</p></div>
             <div class="action-section">
+                <button class="toggle-btn request-btn" onclick="openCampaignRequestModal()">신청</button>
                 <button class="toggle-btn" onclick="scrollToWeeklyCapacity()">주간 현황</button>
                 <button id="calendarJumpBtn" class="toggle-btn" onclick="scrollToCalendar()">캘린더 보기</button>
             </div>
@@ -462,6 +479,34 @@
 
     <div id="dateHoverTooltip" class="hover-tooltip"></div>
 
+    <div id="campaignRequestModal" class="modal">
+        <div class="modal-content request-modal-content">
+            <span style="float:right; cursor:pointer; font-weight:bold; color:var(--text-muted); font-size: 18px;" onclick="closeCampaignRequestModal()">&times;</span>
+            <div style="font-size:16px; font-weight:800; margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px; color:var(--text-main);">캠페인 신청</div>
+            <form id="campaignRequestForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse" method="POST" target="campaignRequestSubmitFrame" onsubmit="handleCampaignRequestSubmit()">
+                <div class="request-form-grid">
+                    <div class="request-field full"><label for="requestCampaignName">캠페인명</label><input class="request-input" id="requestCampaignName" name="entry.458971124" type="text" required></div>
+                    <div class="request-field"><label for="requestStartDate">시작일</label><input class="request-input" id="requestStartDate" name="entry.773533181" type="date" required></div>
+                    <div class="request-field"><label for="requestEndDate">종료일</label><input class="request-input" id="requestEndDate" name="entry.1461402252" type="date" required></div>
+                    <div class="request-field"><label for="requestUiVersion">UI버전</label><input class="request-input" id="requestUiVersion" name="entry.775451523" type="text" placeholder="예: 5.0"></div>
+                    <div class="request-field"><label for="requestChannel">채널</label><select class="request-input" id="requestChannel" name="entry.485853250" required><option value="">선택</option><option>TV팝업</option><option>토스트팝업</option><option>쿠폰</option><option>Seg채널</option></select></div>
+                    <div class="request-field"><label for="requestGnb">GNB</label><input class="request-input" id="requestGnb" name="entry.1826891167" type="text" placeholder="예: 홈"></div>
+                    <div class="request-field"><label for="requestCycle">주기</label><input class="request-input" id="requestCycle" name="entry.5131662" type="text" placeholder="예: 주기성"></div>
+                    <div class="request-field"><label for="requestOfferType">오퍼분류</label><input class="request-input" id="requestOfferType" name="entry.490288765" type="text" placeholder="예: 쿠폰"></div>
+                    <div class="request-field"><label for="requestTotalTarget">전체 타겟수</label><input class="request-input" id="requestTotalTarget" name="entry.1012106116" type="number" min="0" step="1" required></div>
+                    <div class="request-field"><label for="requestSegIdCount">SEG ID 수</label><input class="request-input" id="requestSegIdCount" name="entry.1419360891" type="text" placeholder="예: 1개"></div>
+                    <div class="request-field"><label for="requestDepartment">부서</label><input class="request-input" id="requestDepartment" name="entry.1888132724" type="text" required></div>
+                    <div class="request-field"><label for="requestMarketer">마케터</label><input class="request-input" id="requestMarketer" name="entry.871876714" type="text" required></div>
+                </div>
+                <div class="request-actions">
+                    <button type="button" class="request-cancel-btn" onclick="closeCampaignRequestModal()">닫기</button>
+                    <button type="submit" class="request-submit-btn" id="campaignRequestSubmitBtn">신청하기</button>
+                </div>
+                <div class="request-status" id="campaignRequestStatus"></div>
+            </form>
+            <iframe class="request-submit-frame" name="campaignRequestSubmitFrame" id="campaignRequestSubmitFrame" onload="handleCampaignRequestFrameLoad()"></iframe>
+        </div>
+    </div>
     <div id="eventModal" class="modal">
         <div class="modal-content">
             <span style="float:right; cursor:pointer; font-weight:bold; color:var(--text-muted); font-size: 18px;" onclick="closeModal()">&times;</span>
@@ -473,7 +518,44 @@
     <script>
         const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJDqgcPmC1RsB_57OgHxXZ9uqKNiGDICkSKqftjk6CbflfyhVWA2G0LrqLBwuQtTNsffKBtc-aKbD0/pub?output=csv';
         const SCHEDULE_REQUEST_URL = 'https://docs.google.com/spreadsheets/d/1BdzZj8Rr-9Twi7seNBGLomHm1FH__Rc-OtLEdTGyLmA/edit?gid=834849830&range=B907#gid=834849830';
+        const CAMPAIGN_REQUEST_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse';
+        let campaignRequestSubmitted = false;
 
+        function openCampaignRequestModal() {
+            const modal = document.getElementById('campaignRequestModal');
+            const status = document.getElementById('campaignRequestStatus');
+            const submitBtn = document.getElementById('campaignRequestSubmitBtn');
+            if (status) status.innerText = '';
+            if (submitBtn) submitBtn.disabled = false;
+            if (modal) modal.style.display = 'block';
+        }
+
+        function closeCampaignRequestModal() {
+            const modal = document.getElementById('campaignRequestModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function handleCampaignRequestSubmit() {
+            campaignRequestSubmitted = true;
+            const status = document.getElementById('campaignRequestStatus');
+            const submitBtn = document.getElementById('campaignRequestSubmitBtn');
+            if (status) status.innerText = '신청 내용을 전송 중입니다...';
+            if (submitBtn) submitBtn.disabled = true;
+            setTimeout(() => {
+                if (campaignRequestSubmitted) handleCampaignRequestFrameLoad();
+            }, 1500);
+        }
+
+        function handleCampaignRequestFrameLoad() {
+            if (!campaignRequestSubmitted) return;
+            campaignRequestSubmitted = false;
+            const form = document.getElementById('campaignRequestForm');
+            const status = document.getElementById('campaignRequestStatus');
+            const submitBtn = document.getElementById('campaignRequestSubmitBtn');
+            if (status) status.innerText = '신청이 접수되었습니다.';
+            if (submitBtn) submitBtn.disabled = false;
+            if (form) form.reset();
+        }
         function openScheduleRequestSheet() {
             window.open(SCHEDULE_REQUEST_URL, '_blank', 'noopener');
         }
