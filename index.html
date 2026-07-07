@@ -368,17 +368,10 @@
         .calendar-congestion-badge.yellow { background: #eab308; }
         .calendar-congestion-badge.red { background: #ef4444; }
         .calendar-day-capa-remain {
-            position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
-            display: grid; gap: 1px; padding: 0 1px 1px 0;
-            pointer-events: none;
+            position: absolute; left: 0; bottom: 0; z-index: 1;
+            padding: 0 2px 1px 0; font-size: 9px; line-height: 1; font-weight: 800;
+            color: rgba(100, 116, 139, 0.56); pointer-events: none; white-space: nowrap;
         }
-        .calendar-capa-gauge-row { display: grid; grid-template-columns: 25px 1fr 28px; align-items: center; gap: 3px; height: 8px; }
-        .calendar-capa-label, .calendar-capa-value { font-size: 8px; line-height: 1; font-weight: 800; color: rgba(100, 116, 139, 0.54); white-space: nowrap; }
-        .calendar-capa-value { text-align: right; }
-        .calendar-capa-track { height: 4px; border-radius: 999px; background: rgba(148, 163, 184, 0.18); overflow: hidden; }
-        .calendar-capa-fill { height: 100%; border-radius: 999px; background: rgba(34, 197, 94, 0.45); }
-        .calendar-capa-fill.warn { background: rgba(234, 179, 8, 0.48); }
-        .calendar-capa-fill.risk { background: rgba(239, 68, 68, 0.48); }
         .ai-alert-panel {
             margin: 0 0 12px; padding: 11px 12px; border: 1px solid rgba(15, 76, 129, 0.16); border-radius: 12px;
             background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(241, 245, 249, 0.88));
@@ -1046,21 +1039,6 @@
             else { return sign + Math.round(abs / 100).toLocaleString('ko-KR') + "백"; }
         }
 
-        function getCapaGaugeClass(percent) {
-            if (percent <= 10) return 'risk';
-            if (percent <= 25) return 'warn';
-            return '';
-        }
-
-        function buildCalendarCapaGauge(label, remain, percent) {
-            const safePercent = Math.max(0, Math.min(percent, 100));
-            const gaugeClass = getCapaGaugeClass(safePercent);
-            return `<div class="calendar-capa-gauge-row" title="${label} 잔여 ${formatTargetNumber(remain)}">
-                <span class="calendar-capa-label">${label}</span>
-                <span class="calendar-capa-track"><span class="calendar-capa-fill ${gaugeClass}" style="width:${safePercent}%"></span></span>
-                <span class="calendar-capa-value">${safePercent}%</span>
-            </div>`;
-        }
 
         function renderAiAlertPanel(week, deliveryData) {
             const panel = document.getElementById('aiAlertPanel');
@@ -1407,13 +1385,9 @@
                         capaEl.className = 'calendar-day-capa-remain';
                         cellEl.appendChild(capaEl);
                     }
-                    const bannerCapa = getDailyCapa('banner', dateStr);
-                    const couponCapa = getDailyCapa('coupon', dateStr);
-                    const bannerRemain = Math.max(bannerCapa - getDailyUsed('banner', dateStr), 0);
-                    const couponRemain = Math.max(couponCapa - getDailyUsed('coupon', dateStr), 0);
-                    const bannerPct = bannerCapa > 0 ? Math.round((bannerRemain / bannerCapa) * 100) : 0;
-                    const couponPct = couponCapa > 0 ? Math.round((couponRemain / couponCapa) * 100) : 0;
-                    capaEl.innerHTML = buildCalendarCapaGauge('배너', bannerRemain, bannerPct) + buildCalendarCapaGauge('쿠폰', couponRemain, couponPct);
+                    const bannerRemain = Math.max(getDailyCapa('banner', dateStr) - getDailyUsed('banner', dateStr), 0);
+                    const couponRemain = Math.max(getDailyCapa('coupon', dateStr) - getDailyUsed('coupon', dateStr), 0);
+                    capaEl.innerText = `B ${formatTargetNumber(bannerRemain)} · C ${formatTargetNumber(couponRemain)}`;
                 }
 
                 const topEl = el.parentElement;
