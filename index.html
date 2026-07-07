@@ -368,10 +368,29 @@
         .calendar-congestion-badge.yellow { background: #eab308; }
         .calendar-congestion-badge.red { background: #ef4444; }
         .calendar-day-capa-remain {
-            position: absolute; left: 0; bottom: 0; z-index: 1;
-            font-size: 9.5px; line-height: 1.2; font-weight: 700; color: rgba(100, 116, 139, 0.52);
-            pointer-events: none; white-space: nowrap;
+            position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
+            display: grid; gap: 1px; padding: 0 1px 1px 0;
+            pointer-events: none;
         }
+        .calendar-capa-gauge-row { display: grid; grid-template-columns: 25px 1fr 28px; align-items: center; gap: 3px; height: 8px; }
+        .calendar-capa-label, .calendar-capa-value { font-size: 8px; line-height: 1; font-weight: 800; color: rgba(100, 116, 139, 0.54); white-space: nowrap; }
+        .calendar-capa-value { text-align: right; }
+        .calendar-capa-track { height: 4px; border-radius: 999px; background: rgba(148, 163, 184, 0.18); overflow: hidden; }
+        .calendar-capa-fill { height: 100%; border-radius: 999px; background: rgba(34, 197, 94, 0.45); }
+        .calendar-capa-fill.warn { background: rgba(234, 179, 8, 0.48); }
+        .calendar-capa-fill.risk { background: rgba(239, 68, 68, 0.48); }
+        .ai-alert-panel {
+            margin: 0 0 12px; padding: 11px 12px; border: 1px solid rgba(15, 76, 129, 0.16); border-radius: 12px;
+            background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(241, 245, 249, 0.88));
+            display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start;
+        }
+        .ai-alert-badge { font-size: 10px; font-weight: 950; color: #0f4c81; background: #e0f2fe; border-radius: 999px; padding: 5px 8px; white-space: nowrap; }
+        .ai-alert-title { font-size: 12px; font-weight: 900; color: var(--navy-800); margin-bottom: 4px; }
+        .ai-alert-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .ai-alert-chip { font-size: 11px; font-weight: 800; color: rgba(51, 65, 85, 0.82); background: rgba(255, 255, 255, 0.78); border: 1px solid rgba(203, 213, 225, 0.8); border-radius: 999px; padding: 5px 8px; }
+        .ai-alert-chip.risk { color: #991b1b; background: rgba(254, 226, 226, 0.8); border-color: rgba(252, 165, 165, 0.75); }
+        .ai-alert-chip.warn { color: #854d0e; background: rgba(254, 249, 195, 0.82); border-color: rgba(250, 204, 21, 0.45); }
+        .ai-alert-chip.ok { color: #065f46; background: rgba(209, 250, 229, 0.76); border-color: rgba(110, 231, 183, 0.55); }
         .calendar-congestion-legend {
             display: inline-flex; align-items: center; gap: 6px; margin-right: 8px;
             color: rgba(71, 85, 105, 0.58); font-size: 10px; font-weight: 700; vertical-align: middle;
@@ -454,6 +473,7 @@
                     </div>
                     <span class="overview-badge">오늘 기준</span>
                 </div>
+                <div id="aiAlertPanel" class="ai-alert-panel" aria-label="AI 운영 리스크 알림"></div>
                 <div class="weekly-capacity-chart-grid">
                     <div class="weekly-capacity-chart-card">
                         <div class="weekly-capacity-chart-title">배너 및 쿠폰 잔여 발송 가능 모수</div>
@@ -1026,6 +1046,56 @@
             else { return sign + Math.round(abs / 100).toLocaleString('ko-KR') + "백"; }
         }
 
+        function getCapaGaugeClass(percent) {
+            if (percent <= 10) return 'risk';
+            if (percent <= 25) return 'warn';
+            return '';
+        }
+
+        function buildCalendarCapaGauge(label, remain, percent) {
+            const safePercent = Math.max(0, Math.min(percent, 100));
+            const gaugeClass = getCapaGaugeClass(safePercent);
+            return `<div class="calendar-capa-gauge-row" title="${label} 잔여 ${formatTargetNumber(remain)}">
+                <span class="calendar-capa-label">${label}</span>
+                <span class="calendar-capa-track"><span class="calendar-capa-fill ${gaugeClass}" style="width:${safePercent}%"></span></span>
+                <span class="calendar-capa-value">${safePercent}%</span>
+            </div>`;
+        }
+
+        function renderAiAlertPanel(week, deliveryData) {
+            const panel = document.getElementById('aiAlertPanel');
+            if (!panel || !Array.isArray(week)) return;
+
+            const chips = [];
+            const blocked = week.filter(day => day.bannerRemain <= 0 || day.couponRemain <= 0);
+            if (blocked.length) {
+                chips.push({ level: 'risk', text: `${blocked[0].label} CAPA 초과 가능성` });
+            }
+
+            const tight = week.filter(day => (day.bannerRemain > 0 && day.bannerRemain <= 500000) || (day.couponRemain > 0 && day.couponRemain <= 500000));
+            if (tight.length) {
+                chips.push({ level: 'warn', text: `${tight[0].label} 잔여 50만 이하` });
+            }
+
+            const peak = Object.values(deliveryData || {}).map(day => ({
+                label: day.label,
+                total: day.banner + day.coupon + day.tvPopup + day.toastPopup
+            })).sort((a, b) => b.total - a.total)[0];
+            if (peak && peak.total > 0) {
+                chips.push({ level: 'warn', text: `주간 피크 ${peak.label} · ${formatTargetNumber(peak.total)}` });
+            }
+
+            if (chips.length === 0) {
+                chips.push({ level: 'ok', text: '향후 7일 운영 리스크 낮음' });
+            }
+
+            panel.innerHTML = `
+                <div class="ai-alert-badge">AI Alert</div>
+                <div>
+                    <div class="ai-alert-title">운영 리스크 에이전트</div>
+                    <div class="ai-alert-list">${chips.slice(0, 4).map(chip => `<span class="ai-alert-chip ${chip.level}">${chip.text}</span>`).join('')}</div>
+                </div>`;
+        }
         function buildWeeklyBannerCapaData() {
             const week = [];
             const today = new Date();
@@ -1148,6 +1218,7 @@
 
             // 채널별 발송 그래프
             const channelDeliveryData = buildChannelDeliveryData(week);
+            renderAiAlertPanel(week, channelDeliveryData);
             const allChannels = ['배너', '쿠폰', 'TV팝업', '토스트팝업'];
             
             const channelButtonOptions = [{ label: '전체', value: '' }, ...allChannels.map(channel => ({ label: channel, value: channel }))];
@@ -1336,9 +1407,13 @@
                         capaEl.className = 'calendar-day-capa-remain';
                         cellEl.appendChild(capaEl);
                     }
-                    const bannerRemain = Math.max(getDailyCapa('banner', dateStr) - getDailyUsed('banner', dateStr), 0);
-                    const couponRemain = Math.max(getDailyCapa('coupon', dateStr) - getDailyUsed('coupon', dateStr), 0);
-                    capaEl.innerText = `배너: ${formatTargetNumber(bannerRemain)}, 쿠폰: ${formatTargetNumber(couponRemain)}`;
+                    const bannerCapa = getDailyCapa('banner', dateStr);
+                    const couponCapa = getDailyCapa('coupon', dateStr);
+                    const bannerRemain = Math.max(bannerCapa - getDailyUsed('banner', dateStr), 0);
+                    const couponRemain = Math.max(couponCapa - getDailyUsed('coupon', dateStr), 0);
+                    const bannerPct = bannerCapa > 0 ? Math.round((bannerRemain / bannerCapa) * 100) : 0;
+                    const couponPct = couponCapa > 0 ? Math.round((couponRemain / couponCapa) * 100) : 0;
+                    capaEl.innerHTML = buildCalendarCapaGauge('배너', bannerRemain, bannerPct) + buildCalendarCapaGauge('쿠폰', couponRemain, couponPct);
                 }
 
                 const topEl = el.parentElement;
