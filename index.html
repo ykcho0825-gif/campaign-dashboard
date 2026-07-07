@@ -223,7 +223,7 @@
         .fc-theme-standard .fc-scrollgrid { border-color: var(--border-color) !important; border-radius: 12px; overflow: hidden; }
         
         .fc .fc-toolbar-title { font-size: 18px !important; font-weight: 850 !important; color: var(--navy-800) !important; letter-spacing:-0.03em; }
-        .fc .fc-daygrid-day-frame { min-height: 116px; padding: 6px !important; transition: background-color 0.16s ease, box-shadow 0.16s ease; }
+        .fc .fc-daygrid-day-frame { min-height: 116px; padding: 6px !important; position: relative; transition: background-color 0.16s ease, box-shadow 0.16s ease; }
         .fc .fc-daygrid-day-frame:hover { background: #f8fbff; box-shadow: inset 0 0 0 1px rgba(15, 76, 129, 0.14); }
         .fc .fc-daygrid-day-number { font-size: 13px !important; font-weight: 700 !important; color: #475569 !important; padding: 6px 2px 0 2px !important; }
         .fc .fc-daygrid-day-top { justify-content: flex-start !important; align-items: flex-start !important; position: relative; min-height: 28px; }
@@ -241,7 +241,7 @@
         .fc .fc-button-active { background-color: #e0f2fe !important; border-color: var(--accent-blue) !important; color: var(--accent-blue) !important; }
         .fc-daygrid-more-link { font-size: 11px !important; font-weight: 600 !important; color: var(--accent-blue) !important; }
         
-        .fc-daygrid-day-events { display: flex !important; flex-direction: column !important; gap: 3px !important; overflow: hidden !important; }
+        .fc-daygrid-day-events { display: flex !important; flex-direction: column !important; gap: 3px !important; overflow: hidden !important; padding-bottom: 17px !important; }
         .fc-event { cursor: pointer; padding: 4px 6px; border-radius: 7px !important; border: none !important; margin-bottom: 0 !important; transition: opacity 0.15s, transform 0.15s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06); }
         .fc-event:hover { opacity: 0.9; transform: translateY(-1px); }
         .fc-event-title { font-weight: 600 !important; font-size: 10.5px; line-height: 1.2; }
@@ -327,6 +327,7 @@
             cursor: pointer; transition: all 0.2s ease;
         }
         .channel-filter-btn:hover { border-color: #0f4c81; background: #e0f2fe; color: #0f4c81; }
+        .channel-filter-btn:focus { outline: none; }
         .channel-filter-btn.active { background: #0f4c81; color: #ffffff; border-color: #0f4c81; }
         .channel-bars-wrapper {
             display: flex; flex-direction: column; gap: 14px;
@@ -365,6 +366,17 @@
         .calendar-congestion-badge.green { background: #22c55e; }
         .calendar-congestion-badge.yellow { background: #eab308; }
         .calendar-congestion-badge.red { background: #ef4444; }
+        .calendar-day-capa-remain {
+            position: absolute; left: 7px; bottom: 5px; z-index: 1;
+            font-size: 9.5px; line-height: 1.2; font-weight: 700; color: rgba(71, 85, 105, 0.72);
+            pointer-events: none; white-space: nowrap;
+        }
+        .calendar-congestion-legend {
+            display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;
+            color: rgba(71, 85, 105, 0.62); font-size: 10px; font-weight: 700; vertical-align: middle;
+        }
+        .calendar-congestion-legend .legend-item { display: inline-flex; align-items: center; gap: 3px; }
+        .calendar-congestion-legend .calendar-congestion-badge { width: 7px; height: 7px; margin: 0; opacity: 0.72; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -638,8 +650,14 @@
                 });
         }
 
+        function getCampaignRequestSearchName() {
+            const searchInputValue = (document.getElementById('requestLoadMarketerSearch')?.value || '').trim();
+            const marketerFieldValue = (document.getElementById('requestMarketer')?.value || '').trim();
+            return searchInputValue || marketerFieldValue;
+        }
+
         function getRecentCampaignRequestItems(historyData) {
-            const marketerFilter = (document.getElementById('requestMarketer')?.value || '').trim().toUpperCase();
+            const marketerFilter = getCampaignRequestSearchName().toUpperCase();
             const today = new Date();
             const cutoff = new Date(today);
             cutoff.setMonth(cutoff.getMonth() - 1);
@@ -1052,6 +1070,17 @@
             }, 0);
         }
 
+        function setChannelDeliveryActiveButton(activeBtn) {
+            const buttonGroup = document.getElementById('channelFilterButtons');
+            if (!buttonGroup || !activeBtn) return;
+            buttonGroup.querySelectorAll('.channel-filter-btn').forEach(btn => {
+                const isActive = btn === activeBtn;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                btn.blur();
+            });
+        }
+
         function renderWeeklyBannerCapa() {
             const combinedContainer = document.getElementById('combinedCapaTableContainer');
             const filterButtonsContainer = document.getElementById('channelFilterButtons');
@@ -1120,25 +1149,17 @@
             const channelDeliveryData = buildChannelDeliveryData(week);
             const allChannels = ['배너', '쿠폰', 'TV팝업', '토스트팝업'];
             
-            filterButtonsContainer.innerHTML = '';
-            const filterAllBtn = document.createElement('button');
-            filterAllBtn.className = 'channel-filter-btn active';
-            filterAllBtn.textContent = '전체';
-            filterAllBtn.onclick = () => updateChannelDeliveryGraph(channelDeliveryData, []);
-            filterButtonsContainer.appendChild(filterAllBtn);
-            
-            allChannels.forEach(channel => {
-                const btn = document.createElement('button');
-                btn.className = 'channel-filter-btn';
-                btn.textContent = channel;
-                btn.onclick = () => {
-                    document.querySelectorAll('.channel-filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    filterAllBtn.classList.remove('active');
-                    updateChannelDeliveryGraph(channelDeliveryData, [channel]);
-                };
-                filterButtonsContainer.appendChild(btn);
-            });
+            const channelButtonOptions = [{ label: '전체', value: '' }, ...allChannels.map(channel => ({ label: channel, value: channel }))];
+            filterButtonsContainer.innerHTML = channelButtonOptions.map((option, index) => `
+                <button type="button" class="channel-filter-btn${index === 0 ? ' active' : ''}" data-channel="${option.value}" aria-pressed="${index === 0 ? 'true' : 'false'}">${option.label}</button>
+            `).join('');
+            filterButtonsContainer.onclick = event => {
+                const btn = event.target.closest('.channel-filter-btn');
+                if (!btn || !filterButtonsContainer.contains(btn)) return;
+                const channel = btn.dataset.channel;
+                setChannelDeliveryActiveButton(btn);
+                updateChannelDeliveryGraph(channelDeliveryData, channel ? [channel] : []);
+            };
             
             updateChannelDeliveryGraph(channelDeliveryData, []);
         }
@@ -1306,6 +1327,19 @@
                 const total = getCalendarDailyTargetSum(dateStr);
                 el.innerText = total > 0 ? `(${formatTargetNumber(total)})` : '';
 
+                const frameEl = el.closest('.fc-daygrid-day-frame');
+                if (frameEl) {
+                    let capaEl = frameEl.querySelector('.calendar-day-capa-remain');
+                    if (!capaEl) {
+                        capaEl = document.createElement('div');
+                        capaEl.className = 'calendar-day-capa-remain';
+                        frameEl.appendChild(capaEl);
+                    }
+                    const bannerRemain = Math.max(getDailyCapa('banner', dateStr) - getDailyUsed('banner', dateStr), 0);
+                    const couponRemain = Math.max(getDailyCapa('coupon', dateStr) - getDailyUsed('coupon', dateStr), 0);
+                    capaEl.innerText = `배너: ${formatTargetNumber(bannerRemain)}, 쿠폰: ${formatTargetNumber(couponRemain)}`;
+                }
+
                 const topEl = el.parentElement;
                 if (topEl) {
                     const existingBadge = topEl.querySelector('.calendar-congestion-badge');
@@ -1330,6 +1364,16 @@
                     topEl.appendChild(badge);
                 }
             });
+        }
+
+        function ensureCalendarCongestionLegend() {
+            if (document.querySelector('.calendar-congestion-legend')) return;
+            const todayBtn = document.querySelector('.fc-today-button');
+            if (!todayBtn || !todayBtn.parentElement) return;
+            const legend = document.createElement('span');
+            legend.className = 'calendar-congestion-legend';
+            legend.innerHTML = '<span class="legend-item"><span class="calendar-congestion-badge green"></span>100만 미만</span><span class="legend-item"><span class="calendar-congestion-badge yellow"></span>100~200만</span><span class="legend-item"><span class="calendar-congestion-badge red"></span>200만 이상</span>';
+            todayBtn.insertAdjacentElement('afterend', legend);
         }
 
         function initCalendar(data) {
@@ -1374,12 +1418,14 @@
                     });
                 },
                 datesSet: function() { 
+                    ensureCalendarCongestionLegend();
                     updateSummary(); 
                     updateMonthlyKpi();
                     setTimeout(refreshCalendarDayTargetSums, 0);
                 }
             });
             calendar.render();
+            ensureCalendarCongestionLegend();
             currentFilteredEvents = getInitialFilteredEvents(); 
             setTimeout(refreshCalendarDayTargetSums, 0);
         }
