@@ -367,13 +367,13 @@
         .calendar-congestion-badge.yellow { background: #eab308; }
         .calendar-congestion-badge.red { background: #ef4444; }
         .calendar-day-capa-remain {
-            position: absolute; left: 7px; bottom: 5px; z-index: 1;
-            font-size: 9.5px; line-height: 1.2; font-weight: 700; color: rgba(71, 85, 105, 0.72);
+            position: absolute; left: 4px; bottom: 4px; z-index: 1;
+            font-size: 9.5px; line-height: 1.2; font-weight: 700; color: rgba(100, 116, 139, 0.52);
             pointer-events: none; white-space: nowrap;
         }
         .calendar-congestion-legend {
-            display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;
-            color: rgba(71, 85, 105, 0.62); font-size: 10px; font-weight: 700; vertical-align: middle;
+            display: inline-flex; align-items: center; gap: 6px; margin-right: 8px;
+            color: rgba(71, 85, 105, 0.58); font-size: 10px; font-weight: 700; vertical-align: middle;
         }
         .calendar-congestion-legend .legend-item { display: inline-flex; align-items: center; gap: 3px; }
         .calendar-congestion-legend .calendar-congestion-badge { width: 7px; height: 7px; margin: 0; opacity: 0.72; }
@@ -1373,7 +1373,7 @@
             const legend = document.createElement('span');
             legend.className = 'calendar-congestion-legend';
             legend.innerHTML = '<span class="legend-item"><span class="calendar-congestion-badge green"></span>100만 미만</span><span class="legend-item"><span class="calendar-congestion-badge yellow"></span>100~200만</span><span class="legend-item"><span class="calendar-congestion-badge red"></span>200만 이상</span>';
-            todayBtn.insertAdjacentElement('afterend', legend);
+            todayBtn.insertAdjacentElement('beforebegin', legend);
         }
 
         function initCalendar(data) {
