@@ -535,7 +535,7 @@
                 </div>
             </div>
             <div id="campaignRequestLoadList" class="request-load-list"></div>
-            <form id="campaignRequestForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse" method="POST" target="campaignRequestSubmitFrame" onsubmit="return handleCampaignRequestSubmit()">
+            <form id="campaignRequestForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse" method="POST" target="campaignRequestSubmitFrame" onsubmit="return handleCampaignRequestSubmit(event)">
                 <div class="request-form-grid">
                     <div class="request-field full"><label for="requestCampaignName">캠페인명</label><input class="request-input" id="requestCampaignName" name="entry.458971124" type="text" required></div>
                     <div class="request-field"><label for="requestStartDate">시작일</label><input class="request-input" id="requestStartDate" name="entry.773533181" type="date" required></div>
@@ -581,6 +581,7 @@
         const CAMPAIGN_REQUEST_HISTORY_CSV_URL = 'https://docs.google.com/spreadsheets/d/1BdzZj8Rr-9Twi7seNBGLomHm1FH__Rc-OtLEdTGyLmA/gviz/tq?tqx=out:csv&gid=1998435625';
         let campaignRequestSubmitted = false;
         let campaignRequestPendingItem = null;
+        let campaignRequestSubmitTimer = null;
         let campaignRequestHistoryData = [];
         let campaignRequestHistoryLoaded = false;
         const CAMPAIGN_REQUEST_LOCAL_HISTORY_KEY = 'campaignRequestLocalHistoryData';
@@ -600,7 +601,7 @@
             if (modal) modal.style.display = 'none';
         }
 
-        function handleCampaignRequestSubmit() {
+        function handleCampaignRequestSubmit(event) {
             const status = document.getElementById('campaignRequestStatus');
             const submitBtn = document.getElementById('campaignRequestSubmitBtn');
             const uiVersionValue = syncRequestUiVersionValue();
@@ -613,30 +614,42 @@
                 if (status) status.innerText = '채널을 1개 이상 선택해주세요.';
                 return false;
             }
+            if (campaignRequestSubmitted) return false;
+
             campaignRequestPendingItem = buildCampaignRequestHistoryItem();
+            addCampaignRequestLocalHistoryItem(campaignRequestPendingItem);
             campaignRequestSubmitted = true;
-            if (status) status.innerText = '신청 내용을 전송 중입니다...';
+            campaignRequestHistoryLoaded = false;
+            if (status) status.innerText = '신청 내용을 전송 중입니다... 누적 이력에 저장되었습니다.';
             if (submitBtn) submitBtn.disabled = true;
-            setTimeout(() => {
-                if (campaignRequestSubmitted) handleCampaignRequestFrameLoad();
-            }, 1500);
+            if (campaignRequestSubmitTimer) clearTimeout(campaignRequestSubmitTimer);
+            campaignRequestSubmitTimer = setTimeout(() => {
+                if (campaignRequestSubmitted) completeCampaignRequestSubmit();
+            }, 2500);
             return true;
         }
 
-        function handleCampaignRequestFrameLoad() {
+        function completeCampaignRequestSubmit() {
             if (!campaignRequestSubmitted) return;
             campaignRequestSubmitted = false;
+            if (campaignRequestSubmitTimer) {
+                clearTimeout(campaignRequestSubmitTimer);
+                campaignRequestSubmitTimer = null;
+            }
             const form = document.getElementById('campaignRequestForm');
             const status = document.getElementById('campaignRequestStatus');
             const submitBtn = document.getElementById('campaignRequestSubmitBtn');
-            if (status) status.innerText = '신청이 접수되었습니다.';
-            if (campaignRequestPendingItem) addCampaignRequestLocalHistoryItem(campaignRequestPendingItem);
+            if (status) status.innerText = '신청이 접수되었습니다. 다음 신청도 계속 누적됩니다.';
             campaignRequestPendingItem = null;
             if (submitBtn) submitBtn.disabled = false;
             if (form) form.reset();
             syncRequestUiVersionValue();
             syncRequestChannelValue();
             campaignRequestHistoryLoaded = false;
+        }
+
+        function handleCampaignRequestFrameLoad() {
+            completeCampaignRequestSubmit();
         }
         function loadCampaignRequestLocalHistory() {
             try {
