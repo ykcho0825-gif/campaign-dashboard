@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head> 
+<head>
     <meta charset='utf-8' />
     <title>B tv Campaign Dashboard V9.2</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
@@ -580,8 +580,11 @@
         const CAMPAIGN_REQUEST_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse';
         const CAMPAIGN_REQUEST_HISTORY_CSV_URL = 'https://docs.google.com/spreadsheets/d/1BdzZj8Rr-9Twi7seNBGLomHm1FH__Rc-OtLEdTGyLmA/gviz/tq?tqx=out:csv&gid=1998435625';
         let campaignRequestSubmitted = false;
+        let campaignRequestPendingItem = null;
         let campaignRequestHistoryData = [];
         let campaignRequestHistoryLoaded = false;
+        const CAMPAIGN_REQUEST_LOCAL_HISTORY_KEY = 'campaignRequestLocalHistoryData';
+        let campaignRequestLocalHistoryData = loadCampaignRequestLocalHistory();
 
         function openCampaignRequestModal() {
             const modal = document.getElementById('campaignRequestModal');
@@ -610,6 +613,7 @@
                 if (status) status.innerText = '채널을 1개 이상 선택해주세요.';
                 return false;
             }
+            campaignRequestPendingItem = buildCampaignRequestHistoryItem();
             campaignRequestSubmitted = true;
             if (status) status.innerText = '신청 내용을 전송 중입니다...';
             if (submitBtn) submitBtn.disabled = true;
@@ -626,11 +630,83 @@
             const status = document.getElementById('campaignRequestStatus');
             const submitBtn = document.getElementById('campaignRequestSubmitBtn');
             if (status) status.innerText = '신청이 접수되었습니다.';
+            if (campaignRequestPendingItem) addCampaignRequestLocalHistoryItem(campaignRequestPendingItem);
+            campaignRequestPendingItem = null;
             if (submitBtn) submitBtn.disabled = false;
             if (form) form.reset();
             syncRequestUiVersionValue();
             syncRequestChannelValue();
             campaignRequestHistoryLoaded = false;
+        }
+        function loadCampaignRequestLocalHistory() {
+            try {
+                const saved = localStorage.getItem(CAMPAIGN_REQUEST_LOCAL_HISTORY_KEY);
+                return saved ? JSON.parse(saved) : [];
+            } catch (err) {
+                console.warn('신청 로컬 이력 로드 실패', err);
+                return [];
+            }
+        }
+
+        function saveCampaignRequestLocalHistory() {
+            try {
+                localStorage.setItem(CAMPAIGN_REQUEST_LOCAL_HISTORY_KEY, JSON.stringify(campaignRequestLocalHistoryData.slice(0, 100)));
+            } catch (err) {
+                console.warn('신청 로컬 이력 저장 실패', err);
+            }
+        }
+
+        function getNowRequestTimestamp() {
+            const now = new Date();
+            const pad = value => String(value).padStart(2, '0');
+            return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+
+        function buildCampaignRequestHistoryItem() {
+            return {
+                '_requestLocalId': 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2),
+                '타임스탬프': getNowRequestTimestamp(),
+                '캠페인명': document.getElementById('requestCampaignName')?.value || '',
+                '시작일': document.getElementById('requestStartDate')?.value || '',
+                '종료일': document.getElementById('requestEndDate')?.value || '',
+                'UI버전': getSelectedRequestUiVersions().join(', '),
+                '채널': getSelectedRequestChannels().join(', '),
+                'GNB': document.getElementById('requestGnb')?.value || '',
+                '주기': document.getElementById('requestCycle')?.value || '',
+                '오퍼분류': document.getElementById('requestOfferType')?.value || '',
+                '전체 타겟수': document.getElementById('requestTotalTarget')?.value || '',
+                'SEG ID 수': document.getElementById('requestSegIdCount')?.value || '',
+                '부서': document.getElementById('requestDepartment')?.value || '',
+                '마케터': document.getElementById('requestMarketer')?.value || ''
+            };
+        }
+
+        function getCampaignRequestHistoryKey(item) {
+            if (item && item._requestLocalId) return item._requestLocalId;
+            return [
+                getRequestSourceValue(item, ['타임스탬프', 'Timestamp', '제출일시', '신청일시', '신청일']),
+                getCampaignTitle(item),
+                getRequestSourceValue(item, ['시작일']),
+                getRequestSourceValue(item, ['마케터', '담당자', '담당자 이름', '신청자'])
+            ].join('|');
+        }
+
+        function mergeCampaignRequestHistory(sheetHistoryData) {
+            const seen = new Set();
+            return [...campaignRequestLocalHistoryData, ...(sheetHistoryData || [])].filter(item => {
+                const key = getCampaignRequestHistoryKey(item);
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function addCampaignRequestLocalHistoryItem(item) {
+            if (!item) return;
+            const key = getCampaignRequestHistoryKey(item);
+            campaignRequestLocalHistoryData = [item, ...campaignRequestLocalHistoryData.filter(existing => getCampaignRequestHistoryKey(existing) !== key)].slice(0, 100);
+            saveCampaignRequestLocalHistory();
+            campaignRequestHistoryData = mergeCampaignRequestHistory(campaignRequestHistoryData);
         }
         function escapeHtml(value) {
             return String(value || '').replace(/[&<>"']/g, char => ({
@@ -676,13 +752,14 @@
 
         function fetchCampaignRequestHistory() {
             if (campaignRequestHistoryLoaded) return Promise.resolve(campaignRequestHistoryData);
-            return fetch(CAMPAIGN_REQUEST_HISTORY_CSV_URL)
+            const historyUrl = `${CAMPAIGN_REQUEST_HISTORY_CSV_URL}&_=${Date.now()}`;
+            return fetch(historyUrl, { cache: 'no-store' })
                 .then(res => {
                     if (!res.ok) throw new Error('신청 이력 시트 연결 실패');
                     return res.text();
                 })
                 .then(csvText => {
-                    campaignRequestHistoryData = parseCSV(csvText);
+                    campaignRequestHistoryData = mergeCampaignRequestHistory(parseCSV(csvText));
                     campaignRequestHistoryLoaded = true;
                     return campaignRequestHistoryData;
                 });
