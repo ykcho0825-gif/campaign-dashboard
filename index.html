@@ -134,6 +134,10 @@
         .request-field label { font-size: 11px; font-weight: 850; color: var(--text-muted); }
         .request-input { width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 11px; font-size: 13px; color: var(--text-main); background: #fff; outline: none; }
         .request-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.10); }
+        .request-channel-options { display:flex; gap:8px; flex-wrap:wrap; }
+        .request-channel-option { display:inline-flex; align-items:center; gap:7px; padding:10px 11px; border:1px solid var(--border-color); border-radius:10px; background:#f8fafc; color:var(--navy-800); font-size:12px; font-weight:850; cursor:pointer; user-select:none; }
+        .request-channel-option input { accent-color: var(--accent-blue); }
+        .request-channel-option:has(input:checked) { background:#e0f2fe; border-color:var(--accent-blue); color:var(--accent-blue); }
         .request-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
         .request-submit-btn, .request-cancel-btn { border: 0; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 900; cursor: pointer; }
         .request-submit-btn { background: linear-gradient(135deg, var(--navy-800), var(--navy-700)); color: #fff; }
@@ -531,13 +535,20 @@
                 </div>
             </div>
             <div id="campaignRequestLoadList" class="request-load-list"></div>
-            <form id="campaignRequestForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse" method="POST" target="campaignRequestSubmitFrame" onsubmit="handleCampaignRequestSubmit()">
+            <form id="campaignRequestForm" action="https://docs.google.com/forms/d/e/1FAIpQLSeUm1pgaWzWPB5zzlW9ugoE6BqC_Huex3FYu8NYxxdzFgb41g/formResponse" method="POST" target="campaignRequestSubmitFrame" onsubmit="return handleCampaignRequestSubmit()">
                 <div class="request-form-grid">
                     <div class="request-field full"><label for="requestCampaignName">캠페인명</label><input class="request-input" id="requestCampaignName" name="entry.458971124" type="text" required></div>
                     <div class="request-field"><label for="requestStartDate">시작일</label><input class="request-input" id="requestStartDate" name="entry.773533181" type="date" required></div>
                     <div class="request-field"><label for="requestEndDate">종료일</label><input class="request-input" id="requestEndDate" name="entry.1461402252" type="date" required></div>
-                    <div class="request-field"><label for="requestUiVersion">UI버전</label><input class="request-input" id="requestUiVersion" name="entry.775451523" type="text" placeholder="예: 5.0"></div>
-                    <div class="request-field"><label for="requestChannel">채널</label><select class="request-input" id="requestChannel" name="entry.485853250" required><option value="">선택</option><option>TV팝업</option><option>토스트팝업</option><option>쿠폰</option><option>Seg채널</option></select></div>
+                    <div class="request-field"><label>UI버전</label><div class="request-channel-options" id="requestUiVersionOptions">
+                        <label class="request-channel-option"><input type="checkbox" class="request-ui-version-check" value="4.0"> 4.0</label>
+                        <label class="request-channel-option"><input type="checkbox" class="request-ui-version-check" value="5.0"> 5.0</label>
+                    </div><div id="requestUiVersionHiddenFields"><input type="hidden" name="entry.775451523_sentinel"></div></div>
+                    <div class="request-field"><label>채널</label><div class="request-channel-options" id="requestChannelOptions">
+                        <label class="request-channel-option"><input type="checkbox" class="request-channel-check" value="TV팝업"> TV팝업</label>
+                        <label class="request-channel-option"><input type="checkbox" class="request-channel-check" value="타겟배너"> 타겟배너</label>
+                        <label class="request-channel-option"><input type="checkbox" class="request-channel-check" value="토스트팝업"> 토스트팝업</label>
+                    </div><div id="requestChannelHiddenFields"><input type="hidden" name="entry.485853250_sentinel"></div></div>
                     <div class="request-field"><label for="requestGnb">GNB</label><input class="request-input" id="requestGnb" name="entry.1826891167" type="text" placeholder="예: 홈"></div>
                     <div class="request-field"><label for="requestCycle">주기</label><input class="request-input" id="requestCycle" name="entry.5131662" type="text" placeholder="예: 주기성"></div>
                     <div class="request-field"><label for="requestOfferType">오퍼분류</label><input class="request-input" id="requestOfferType" name="entry.490288765" type="text" placeholder="예: 쿠폰"></div>
@@ -587,14 +598,25 @@
         }
 
         function handleCampaignRequestSubmit() {
-            campaignRequestSubmitted = true;
             const status = document.getElementById('campaignRequestStatus');
             const submitBtn = document.getElementById('campaignRequestSubmitBtn');
+            const uiVersionValue = syncRequestUiVersionValue();
+            const channelValue = syncRequestChannelValue();
+            if (!uiVersionValue) {
+                if (status) status.innerText = 'UI버전을 1개 이상 선택해주세요.';
+                return false;
+            }
+            if (!channelValue) {
+                if (status) status.innerText = '채널을 1개 이상 선택해주세요.';
+                return false;
+            }
+            campaignRequestSubmitted = true;
             if (status) status.innerText = '신청 내용을 전송 중입니다...';
             if (submitBtn) submitBtn.disabled = true;
             setTimeout(() => {
                 if (campaignRequestSubmitted) handleCampaignRequestFrameLoad();
             }, 1500);
+            return true;
         }
 
         function handleCampaignRequestFrameLoad() {
@@ -606,6 +628,8 @@
             if (status) status.innerText = '신청이 접수되었습니다.';
             if (submitBtn) submitBtn.disabled = false;
             if (form) form.reset();
+            syncRequestUiVersionValue();
+            syncRequestChannelValue();
             campaignRequestHistoryLoaded = false;
         }
         function escapeHtml(value) {
@@ -728,13 +752,71 @@
                 });
         }
 
+        function getSelectedRequestUiVersions() {
+            return Array.from(document.querySelectorAll('.request-ui-version-check:checked')).map(el => el.value);
+        }
+
+        function syncRequestUiVersionValue() {
+            const selectedVersions = getSelectedRequestUiVersions();
+            const hiddenFields = document.getElementById('requestUiVersionHiddenFields');
+            if (hiddenFields) {
+                hiddenFields.innerHTML = '<input type="hidden" name="entry.775451523_sentinel">';
+                selectedVersions.forEach(version => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'entry.775451523';
+                    input.value = version;
+                    hiddenFields.appendChild(input);
+                });
+            }
+            return selectedVersions.join(', ');
+        }
+
+        function setRequestUiVersions(value) {
+            const text = String(value || '').toUpperCase();
+            document.querySelectorAll('.request-ui-version-check').forEach(cb => {
+                cb.checked = text.includes(cb.value.toUpperCase());
+            });
+            syncRequestUiVersionValue();
+        }
+        function getSelectedRequestChannels() {
+            return Array.from(document.querySelectorAll('.request-channel-check:checked')).map(el => el.value);
+        }
+
+        function syncRequestChannelValue() {
+            const selectedChannels = getSelectedRequestChannels();
+            const hiddenFields = document.getElementById('requestChannelHiddenFields');
+            if (hiddenFields) {
+                hiddenFields.innerHTML = '<input type="hidden" name="entry.485853250_sentinel">';
+                selectedChannels.forEach(channel => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'entry.485853250';
+                    input.value = channel;
+                    hiddenFields.appendChild(input);
+                });
+            }
+            return selectedChannels.join(', ');
+        }
+
+        function setRequestChannels(value) {
+            const text = String(value || '').toUpperCase();
+            document.querySelectorAll('.request-channel-check').forEach(cb => {
+                const optionValue = cb.value.toUpperCase();
+                cb.checked = (optionValue.includes('TV') && text.includes('TV'))
+                    || (optionValue.includes('토스트') && text.includes('토스트'))
+                    || (optionValue.includes('타겟배너') && (text.includes('SEG') || text.includes('배너') || text.includes('타겟')));
+            });
+            syncRequestChannelValue();
+        }
+
         function normalizeRequestChannel(value) {
             const text = String(value || '').toUpperCase();
-            if (text.includes('TV')) return 'TV팝업';
-            if (text.includes('토스트')) return '토스트팝업';
-            if (text.includes('쿠폰')) return '쿠폰';
-            if (text.includes('SEG') || text.includes('배너')) return 'Seg채널';
-            return value || '';
+            const channels = [];
+            if (text.includes('TV')) channels.push('TV팝업');
+            if (text.includes('SEG') || text.includes('배너') || text.includes('타겟')) channels.push('타겟배너');
+            if (text.includes('토스트')) channels.push('토스트팝업');
+            return channels.join(', ');
         }
 
         function loadCampaignRequestItem(index) {
@@ -743,8 +825,8 @@
             setRequestField('requestCampaignName', getCampaignTitle(item));
             setRequestField('requestStartDate', cleanDateStr(getRequestSourceValue(item, ['시작일'])));
             setRequestField('requestEndDate', cleanDateStr(getRequestSourceValue(item, ['종료일'])));
-            setRequestField('requestUiVersion', getRequestSourceValue(item, ['UI버전', 'UI 버전']));
-            setRequestField('requestChannel', normalizeRequestChannel(getRequestSourceValue(item, ['채널', '필터'])));
+            setRequestUiVersions(getRequestSourceValue(item, ['UI버전', 'UI 버전']));
+            setRequestChannels(getRequestSourceValue(item, ['채널', '필터']));
             setRequestField('requestGnb', getRequestSourceValue(item, ['GNB']));
             setRequestField('requestCycle', getRequestSourceValue(item, ['주기', '주기성 여부']));
             setRequestField('requestOfferType', getRequestSourceValue(item, ['오퍼분류', '오퍼 분류', '쿠폰 여부']));
@@ -780,6 +862,8 @@
             document.querySelectorAll('.date-filter').forEach(cb => cb.addEventListener('change', applyFilters));
             document.getElementById('excludeWiredCampaigns').addEventListener('change', applyFilters);
             document.getElementById('eventSearch').addEventListener('input', applyFilters);
+            document.querySelectorAll('.request-ui-version-check').forEach(cb => cb.addEventListener('change', syncRequestUiVersionValue));
+            document.querySelectorAll('.request-channel-check').forEach(cb => cb.addEventListener('change', syncRequestChannelValue));
             setDefaultCapaDate();
             ['capaDate','capaTarget','capaBanner','capaCoupon'].forEach(id => { 
                 const el = document.getElementById(id); 
